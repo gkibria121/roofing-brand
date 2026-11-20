@@ -146,8 +146,26 @@ describe("inquiry form validation", () => {
     });
     expect(invalid.success).toBe(false);
     if (!invalid.success) {
-      expect(invalid.fieldErrors.service).toBeDefined();
+      expect(invalid.fieldErrors.service).toBe("Please select a service.");
       expect(invalid.fieldErrors.message).toBeDefined();
+    }
+  });
+
+  it("produces user-friendly messages when FormData.get() yields null values", () => {
+    const res = validateContactInquiry({
+      name: null,
+      phone: null,
+      email: null,
+      service: null,
+      message: null,
+    });
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.fieldErrors.name).toBe("Please enter your full name.");
+      expect(res.fieldErrors.phone).toBe("Please enter a valid phone number.");
+      expect(res.fieldErrors.email).toBe("Please enter a valid email address.");
+      expect(res.fieldErrors.service).toBe("Please select a service.");
+      expect(res.fieldErrors.message).toContain("at least 10 characters");
     }
   });
 });

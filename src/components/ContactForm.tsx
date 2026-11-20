@@ -30,11 +30,11 @@ export function ContactForm() {
     const form = e.currentTarget;
     const d = new FormData(form);
     const parsed = validateContactInquiry({
-      name: d.get("name"),
-      phone: d.get("phone"),
-      email: d.get("email"),
-      service: d.get("service"),
-      message: d.get("message"),
+      name: String(d.get("name") ?? ""),
+      phone: String(d.get("phone") ?? ""),
+      email: String(d.get("email") ?? ""),
+      service: String(d.get("service") ?? ""),
+      message: String(d.get("message") ?? ""),
     });
 
     if (!parsed.success) {

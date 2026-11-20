@@ -137,27 +137,41 @@ export const ConfiguratorStateSchema = z.object({
 });
 export type ConfiguratorState = z.infer<typeof ConfiguratorStateSchema>;
 
-const phoneSchema = z
-  .string()
-  .trim()
-  .min(7, "Please enter a valid phone number.")
-  .max(30, "Phone number is too long.")
-  .refine((v) => (v.match(/\d/g)?.length ?? 0) >= 7, "Phone number must contain at least 7 digits.");
+const coerceNullishToEmpty = (v: unknown) => (v == null ? "" : v);
+
+const phoneSchema = z.preprocess(
+  coerceNullishToEmpty,
+  z
+    .string()
+    .trim()
+    .min(7, "Please enter a valid phone number.")
+    .max(30, "Phone number is too long.")
+    .refine((v) => (v.match(/\d/g)?.length ?? 0) >= 7, "Phone number must contain at least 7 digits."),
+);
 
 export const QuickEstimateInquirySchema = z.object({
-  name: z.string().trim().min(2, "Please enter your full name.").max(120, "Name is too long."),
+  name: z.preprocess(
+    coerceNullishToEmpty,
+    z.string().trim().min(2, "Please enter your full name.").max(120, "Name is too long."),
+  ),
   phone: phoneSchema,
-  email: z.string().trim().pipe(z.email("Please enter a valid email address.")),
+  email: z.preprocess(
+    coerceNullishToEmpty,
+    z.string().trim().pipe(z.email("Please enter a valid email address.")),
+  ),
 });
 export type QuickEstimateInquiry = z.infer<typeof QuickEstimateInquirySchema>;
 
 export const ContactInquirySchema = QuickEstimateInquirySchema.extend({
-  service: z.string().trim().min(1, "Please select a service."),
-  message: z
-    .string()
-    .trim()
-    .min(10, "Please share a few details about your project (at least 10 characters).")
-    .max(2000, "Message is too long."),
+  service: z.preprocess(coerceNullishToEmpty, z.string().trim().min(1, "Please select a service.")),
+  message: z.preprocess(
+    coerceNullishToEmpty,
+    z
+      .string()
+      .trim()
+      .min(10, "Please share a few details about your project (at least 10 characters).")
+      .max(2000, "Message is too long."),
+  ),
 });
 export type ContactInquiry = z.infer<typeof ContactInquirySchema>;
 
