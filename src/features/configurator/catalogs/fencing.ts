@@ -1,49 +1,14 @@
+import type { Answers, FenceFinish, FenceHeight, FencePlacement, FenceStyleDef } from "../domain/schemas";
+import type { Callout, ServicePackageGroup, ServicePlugin, StepDef } from "../domain/types";
+
 /**
  * Extensible Fence Catalog — single source of truth for fence styles,
  * finishes/colors, heights, placements, 3D geometry presets, and packages.
  *
- * To add a new fence product in the future, append a new entry to `FENCE_CATALOG`:
- * both the 3D yard preview and the estimator UI / packages will pick it up automatically.
+ * Adding a new fence product in the future only requires adding one object to
+ * `FENCE_CATALOG` below; the 3D engine, Guided Steps, Live Decorator, Matching
+ * Packages, and automated schema tests will automatically validate and render it.
  */
-
-export type FenceGeometryKind =
-  | "wood-privacy"
-  | "vinyl-privacy"
-  | "ornamental-iron"
-  | "picket"
-  | "horizontal-slat"
-  | "chain-link";
-
-export type FenceFinish = {
-  id: string;
-  label: string;
-  /** Primary sRGB hex color for boards/pickets/mesh. */
-  color: string;
-  /** Optional contrasting post color (e.g. matte-black steel posts on horizontal wood slats). */
-  postColor?: string;
-};
-
-export type FenceTier = {
-  name: string;
-  tagline: string;
-  features: string[];
-  recommended?: boolean;
-};
-
-export type FenceStyleDef = {
-  id: string;
-  label: string;
-  shortDescription: string;
-  geometry: FenceGeometryKind;
-  defaultFinishId: string;
-  finishes: FenceFinish[];
-  /** Recommended heights in feet (used for display; user can still pick 4/6/8 ft). */
-  defaultHeight: FenceHeight;
-  packages: FenceTier[];
-};
-
-export type FenceHeight = "4ft" | "6ft" | "8ft";
-export type FencePlacement = "backyard" | "full-perimeter" | "front-yard";
 
 export const FENCE_HEIGHT_METERS: Record<FenceHeight, number> = {
   "4ft": 1.22,
@@ -51,19 +16,19 @@ export const FENCE_HEIGHT_METERS: Record<FenceHeight, number> = {
   "8ft": 2.44,
 };
 
-export const fenceHeightOptions: { value: FenceHeight; label: string; description: string }[] = [
+export const FENCE_HEIGHT_OPTIONS: readonly { value: FenceHeight; label: string; description: string }[] = [
   { value: "4ft", label: "4 ft", description: "Open front-yard & decorative height" },
   { value: "6ft", label: "6 ft", description: "Standard residential privacy height" },
   { value: "8ft", label: "8 ft", description: "Tall maximum privacy & commercial security" },
 ];
 
-export const fencePlacementOptions: { value: FencePlacement; label: string; description: string }[] = [
+export const FENCE_PLACEMENT_OPTIONS: readonly { value: FencePlacement; label: string; description: string }[] = [
   { value: "backyard", label: "Backyard & sides", description: "Encloses rear yard from house corners" },
   { value: "full-perimeter", label: "Full perimeter", description: "Surrounds entire lot with driveway & walk openings" },
   { value: "front-yard", label: "Front yard accent", description: "Frames the front yard & street edge" },
 ];
 
-export const FENCE_CATALOG: FenceStyleDef[] = [
+export const FENCE_CATALOG: readonly FenceStyleDef[] = [
   {
     id: "wood-privacy",
     label: "Wood Privacy",
@@ -258,3 +223,145 @@ export function getFenceFinish(styleId?: string, finishId?: string): FenceFinish
   const style = getFenceStyle(styleId);
   return style.finishes.find((f) => f.id === finishId) ?? style.finishes[0];
 }
+
+export function isKnownFenceStyle(id: string): boolean {
+  return FENCE_CATALOG.some((f) => f.id === id);
+}
+
+const FENCING_STEPS: Partial<Record<keyof Answers, StepDef>> = {
+  fenceStyle: {
+    id: "fenceStyle",
+    category: "fencing",
+    summaryLabel: "Fence style",
+    title: "Which fence style fits your property?",
+    hint: "Watch the 3D fence wrap around your yard as you preview each style.",
+    options: () =>
+      FENCE_CATALOG.map((f) => ({
+        value: f.id,
+        label: f.label,
+        description: f.shortDescription,
+      })),
+  },
+  fenceFinish: {
+    id: "fenceFinish",
+    category: "fencing",
+    summaryLabel: "Fence finish",
+    title: "Choose your fence color & finish",
+    options: (a) => {
+      const style = getFenceStyle(a.fenceStyle);
+      return style.finishes.map((fin) => ({
+        value: fin.id,
+        label: fin.label,
+        swatch: fin.color,
+        swatchSecondary: fin.postColor,
+      }));
+    },
+  },
+  fenceHeight: {
+    id: "fenceHeight",
+    category: "fencing",
+    summaryLabel: "Fence height",
+    title: "How tall should your fence be?",
+    options: () => [...FENCE_HEIGHT_OPTIONS],
+  },
+  fencePlacement: {
+    id: "fencePlacement",
+    category: "fencing",
+    summaryLabel: "Fence coverage",
+    title: "Where around the house should the fence go?",
+    options: () => [...FENCE_PLACEMENT_OPTIONS],
+  },
+  fenceGate: {
+    id: "fenceGate",
+    category: "fencing",
+    summaryLabel: "Entry gate",
+    title: "Add matching entry & driveway gates?",
+    hint: "Includes a walk gate for paths and a double-swing gate across the driveway when enclosed.",
+    options: () => [
+      { value: "yes", label: "Yes, include matching gates", description: "Framed gates with matte-black latches" },
+      { value: "no", label: "No gates (open entry)", description: "Leave walkway and driveway openings clear" },
+    ],
+  },
+};
+
+function articleFor(word: string): string {
+  return /^[aeiou]/i.test(word) ? "an" : "a";
+}
+
+export const fencingPlugin: ServicePlugin = {
+  id: "fencing",
+  label: "Fencing",
+  subtitle: "Styles, colors & gates",
+  stepIds: ["fenceStyle", "fenceFinish", "fenceHeight", "fencePlacement", "fenceGate"],
+  steps: FENCING_STEPS,
+
+  seedDefaults(answers) {
+    const style = getFenceStyle(answers.fenceStyle);
+    return {
+      ...answers,
+      fenceStyle: answers.fenceStyle ?? style.id,
+      fenceFinish: answers.fenceFinish ?? style.defaultFinishId,
+      fenceHeight: answers.fenceHeight ?? style.defaultHeight,
+      fencePlacement: answers.fencePlacement ?? "backyard",
+      fenceGate: answers.fenceGate ?? "yes",
+    };
+  },
+
+  sanitize(answers) {
+    const next = { ...answers };
+    if (next.fenceStyle && !isKnownFenceStyle(next.fenceStyle)) {
+      next.fenceStyle = FENCE_CATALOG[0].id;
+    }
+    if (next.fenceStyle) {
+      const style = getFenceStyle(next.fenceStyle);
+      const validFinish = style.finishes.some((f) => f.id === next.fenceFinish);
+      if (!validFinish) next.fenceFinish = style.defaultFinishId;
+      if (!next.fenceHeight) next.fenceHeight = style.defaultHeight;
+    }
+    return next;
+  },
+
+  getPackageGroup(answers): ServicePackageGroup {
+    const style = getFenceStyle(answers.fenceStyle);
+    const finish = getFenceFinish(style.id, answers.fenceFinish);
+    return {
+      serviceId: "fencing",
+      radioGroupName: "fencePackageTier",
+      legend: `Choose ${articleFor(style.label)} ${style.label} (${finish.label}) fencing package:`,
+      itemLabel: `${style.label} Fence`,
+      tiers: style.packages,
+    };
+  },
+
+  getCallouts(answers): Callout[] {
+    const out: Callout[] = [
+      {
+        title: "Property line & utility check",
+        text: "Before digging post holes, we verify linear footage on site, confirm grade slopes, and coordinate utility locates.",
+      },
+    ];
+    if ((answers.fenceGate ?? "yes") === "yes") {
+      out.push({
+        title: "Custom-fitted gates & hardware",
+        text: "Matching walk and driveway gates are framed on heavy structural posts with rust-resistant hinges and latches.",
+      });
+    }
+    return out;
+  },
+
+  getBadges(answers): string[] {
+    const style = getFenceStyle(answers.fenceStyle);
+    const finish = getFenceFinish(style.id, answers.fenceFinish);
+    const height = answers.fenceHeight ?? style.defaultHeight;
+    return [`${height} ${style.label} (${finish.label})`];
+  },
+
+  getSpecSummary(answers) {
+    const style = getFenceStyle(answers.fenceStyle);
+    const height = answers.fenceHeight ?? style.defaultHeight;
+    return {
+      label: "Fence",
+      value: `${height} ${style.label}`,
+    };
+  },
+};

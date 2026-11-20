@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { RoofScene } from "@/lib/three/RoofScene";
-import type { SceneConfig } from "@/lib/three/house";
+import type { RoofScene } from "../three/RoofScene";
+import type { SceneConfig } from "../three/types";
 
 type Props = {
   config: SceneConfig;
-  /** Short badges shown over the model, e.g. "2 stories · Moderate · Asphalt". */
-  badges: string[];
+  badges: readonly string[];
   caption?: string;
 };
 
@@ -41,13 +40,12 @@ export default function HouseViewer({ config, badges, caption }: Props) {
   const fGate = fence?.gate ?? true;
   const initialConfigRef = useRef<SceneConfig>(config);
 
-  // Create the WebGL scene once (three.js is code-split into this chunk).
   useEffect(() => {
     let cancelled = false;
     let scene: RoofScene | null = null;
     (async () => {
       try {
-        const { RoofScene } = await import("@/lib/three/RoofScene");
+        const { RoofScene } = await import("../three/RoofScene");
         if (cancelled || !wrapRef.current || !canvasRef.current) return;
         scene = new RoofScene(wrapRef.current, canvasRef.current, { onAutoRotateChange: setRotating });
         sceneRef.current = scene;
@@ -55,7 +53,7 @@ export default function HouseViewer({ config, badges, caption }: Props) {
         setDescription(scene.setConfig(initialConfigRef.current).description);
         setReady(true);
       } catch {
-        if (!cancelled) setFailed(true); // WebGL unavailable
+        if (!cancelled) setFailed(true);
       }
     })();
     return () => {
@@ -65,7 +63,6 @@ export default function HouseViewer({ config, badges, caption }: Props) {
     };
   }, []);
 
-  // Rebuild the model whenever any building, roof or fence configuration field changes.
   useEffect(() => {
     const next: SceneConfig = {
       slope,

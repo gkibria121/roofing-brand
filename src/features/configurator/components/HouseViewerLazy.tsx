@@ -7,7 +7,7 @@ export const HouseViewerLazy = dynamic(() => import("./HouseViewer"), {
   ssr: false,
   loading: () => (
     <div
-      className="grid aspect-[4/3] w-full place-items-center rounded-3xl border border-slate-200 bg-gradient-to-b from-sky-100 to-white text-sm font-semibold text-slate-500"
+      className="grid aspect-[4/3] w-full place-items-center rounded-3xl border border-slate-200 bg-gradient-to-b from-[#8dbde8] via-[#cfe3f4] to-[#dce9f5] text-sm font-semibold text-brand-900/70"
       role="status"
     >
       Loading 3D preview…

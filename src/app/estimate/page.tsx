@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageHeader } from "@/components/PageHeader";
-import { EstimateWizard } from "@/components/estimate/EstimateWizard";
 import { JsonLd } from "@/components/JsonLd";
+import { EstimateWizard } from "@/features/configurator";
 import { breadcrumbSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 
@@ -28,7 +29,15 @@ export default function EstimatePage() {
         crumbs={[{ name: "3D Estimate" }]}
       />
 
-      <EstimateWizard />
+      <Suspense
+        fallback={
+          <div className="container-x py-16 text-center text-sm font-semibold text-slate-500" role="status">
+            Loading 3D configurator…
+          </div>
+        }
+      >
+        <EstimateWizard />
+      </Suspense>
 
       <section aria-label="Estimate guarantees" className="border-t border-slate-200 bg-slate-50 py-12">
         <ul className="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

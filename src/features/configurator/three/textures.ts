@@ -6,7 +6,8 @@ import {
   SRGBColorSpace,
   type Texture,
 } from "three";
-import type { Material } from "@/lib/estimate/questions";
+import { getRoofMaterialDef } from "../catalogs/roofing";
+import type { Material } from "../domain/schemas";
 
 /** Deterministic PRNG so textures and decals stay consistent across renders. */
 export function mulberry32(seed: number) {
@@ -19,34 +20,6 @@ export function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-export type MaterialSpec = {
-  /** Real-world size (metres) that one tile covers. */
-  tile: number;
-  roughness: number;
-  metalness: number;
-  bump: number;
-};
-
-export const materialSpecs: Record<Material, MaterialSpec> = {
-  asphalt: { tile: 2.1, roughness: 0.92, metalness: 0.02, bump: 0.055 },
-  metal: { tile: 1.5, roughness: 0.34, metalness: 0.68, bump: 0.03 },
-  tile: { tile: 2.0, roughness: 0.72, metalness: 0.02, bump: 0.085 },
-  cedar: { tile: 2.0, roughness: 0.88, metalness: 0.0, bump: 0.065 },
-  tpo: { tile: 4.0, roughness: 0.56, metalness: 0.02, bump: 0.02 },
-  epdm: { tile: 4.0, roughness: 0.88, metalness: 0.0, bump: 0.02 },
-  modbit: { tile: 3.0, roughness: 0.94, metalness: 0.0, bump: 0.04 },
-};
-
-export const baseColors: Record<Material, string> = {
-  asphalt: "#3b4047",
-  metal: "#56636d",
-  tile: "#ad4d34",
-  cedar: "#875a3a",
-  tpo: "#eceff1",
-  epdm: "#282b2f",
-  modbit: "#575a5f",
-};
 
 function makeCanvas(w: number, h = w) {
   const c = document.createElement("canvas");
@@ -93,7 +66,7 @@ export function createRoofTextures(kind: Material, anisotropy: number): PBRTextu
   const c = color.getContext("2d")!;
   const b = bump.getContext("2d")!;
   const rnd = mulberry32(kind.length * 7919 + kind.charCodeAt(0) * 31);
-  const base = baseColors[kind];
+  const base = getRoofMaterialDef(kind).baseColor;
   b.fillStyle = "#7f7f7f";
   b.fillRect(0, 0, S, S);
 

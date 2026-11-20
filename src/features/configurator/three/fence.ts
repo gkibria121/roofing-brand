@@ -6,36 +6,13 @@ import {
   InstancedMesh,
   Matrix4,
   Mesh,
-  MeshStandardMaterial,
   PlaneGeometry,
   Quaternion,
   Vector3,
-  type MeshStandardMaterialParameters,
 } from "three";
-import {
-  FENCE_HEIGHT_METERS,
-  getFenceFinish,
-  getFenceStyle,
-  type FenceHeight,
-  type FencePlacement,
-} from "@/lib/estimate/fences";
-import type { BuildingType } from "@/lib/estimate/questions";
-
-export type FenceSceneConfig = {
-  enabled: boolean;
-  styleId: string;
-  finishId: string;
-  height: FenceHeight;
-  placement: FencePlacement;
-  gate: boolean;
-};
-
-export interface FenceAssetProvider {
-  std(key: string, params: MeshStandardMaterialParameters): MeshStandardMaterial;
-  fenceWood(colorHex: string): MeshStandardMaterial;
-  fenceVinyl(colorHex: string): MeshStandardMaterial;
-  fenceChainLink(colorHex: string): MeshStandardMaterial;
-}
+import { FENCE_HEIGHT_METERS, getFenceFinish, getFenceStyle } from "../catalogs/fencing";
+import type { BuildingType, FencePlacement } from "../domain/schemas";
+import type { FenceAssetProvider, FenceSceneConfig } from "./types";
 
 type Run = {
   a: [number, number]; // [x, z]

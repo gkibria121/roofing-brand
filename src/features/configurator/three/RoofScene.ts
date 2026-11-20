@@ -13,8 +13,11 @@ import {
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { AssetLibrary, buildHouse, disposeGroup, keepCameraOutside, type House, type SceneConfig } from "./house";
+import { AssetLibrary, disposeGroup } from "./assets";
+import { keepCameraOutside } from "./collision";
+import { buildHouse } from "./house";
 import { createOutdoorEnvironmentTexture } from "./textures";
+import type { House, SceneConfig } from "./types";
 
 type Listeners = { onAutoRotateChange?: (on: boolean) => void };
 

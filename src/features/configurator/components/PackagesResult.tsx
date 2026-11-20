@@ -1,20 +1,20 @@
 "use client";
 
 import { useId, useState } from "react";
-import { getFenceFinish, getFenceStyle } from "@/lib/estimate/fences";
-import { getCallouts, getFencePackages, getPackages, type Tier } from "@/lib/estimate/packages";
+import { site } from "@/lib/site";
 import {
+  getAllCallouts,
+  getServicePackageGroups,
   getStepsForServices,
   labelFor,
-  materialLabels,
-  type Answers,
-  type ServiceId,
-  type StepId,
-} from "@/lib/estimate/questions";
-import { site } from "@/lib/site";
+} from "../domain/engine";
+import { getServicePlugin } from "../domain/registry";
+import type { Answers, ServiceId, StepId } from "../domain/schemas";
+import type { ServicePackageGroup } from "../domain/types";
+import { validateQuickEstimateInquiry } from "../domain/validation";
 
 type Props = {
-  services: ServiceId[];
+  services: readonly ServiceId[];
   answers: Partial<Answers>;
   onEditStep: (stepId: StepId) => void;
   onBackToDecorate: () => void;
@@ -22,33 +22,29 @@ type Props = {
 };
 
 function TierList({
-  name,
-  legend,
-  tiers,
+  group,
   selected,
   onSelect,
   uid,
 }: {
-  name: string;
-  legend: string;
-  tiers: Tier[];
+  group: ServicePackageGroup;
   selected: string;
   onSelect: (tierName: string) => void;
   uid: string;
 }) {
   return (
     <fieldset className="mt-6 border-0 p-0">
-      <legend className="text-sm font-bold text-brand-900">{legend}</legend>
+      <legend className="text-sm font-bold text-brand-900">{group.legend}</legend>
       <div className="mt-3.5 space-y-3.5">
-        {tiers.map((pkg) => {
+        {group.tiers.map((pkg) => {
           const checked = selected === pkg.name;
-          const id = `${uid}-${name}-${pkg.name}`;
+          const id = `${uid}-${group.radioGroupName}-${pkg.name}`;
           return (
             <div key={pkg.name} className="relative">
               <input
                 id={id}
                 type="radio"
-                name={name}
+                name={group.radioGroupName}
                 value={pkg.name}
                 checked={checked}
                 onChange={() => onSelect(pkg.name)}
@@ -122,55 +118,60 @@ function TierList({
 }
 
 export function PackagesResult({ services, answers, onEditStep, onBackToDecorate, onStartOver }: Props) {
-  const hasRoof = services.includes("roofing");
-  const hasFence = services.includes("fencing");
-
-  const roofPackages = getPackages(answers);
-  const fencePackages = getFencePackages(answers);
-  const callouts = getCallouts(answers, services);
+  const groups = getServicePackageGroups(services, answers);
+  const callouts = getAllCallouts(services, answers);
   const activeSteps = getStepsForServices(services);
-
-  const desiredRoof = answers.desiredType ?? (answers.slope === "flat" ? "tpo" : "asphalt");
-  const fenceStyle = getFenceStyle(answers.fenceStyle);
-  const fenceFinish = getFenceFinish(fenceStyle.id, answers.fenceFinish);
-
-  const [selectedRoofPkg, setSelectedRoofPkg] = useState(
-    roofPackages.find((p) => p.recommended)?.name ?? roofPackages[0]?.name ?? "Signature",
-  );
-  const [selectedFencePkg, setSelectedFencePkg] = useState(
-    fencePackages.find((p) => p.recommended)?.name ?? fencePackages[0]?.name ?? "Signature",
-  );
-  const [sent, setSent] = useState(false);
   const uid = useId();
 
-  const summaryTitle =
-    hasRoof && hasFence
-      ? `${materialLabels[desiredRoof]} Roof + ${fenceStyle.label} Fence`
-      : hasFence
-        ? `${fenceStyle.label} (${fenceFinish.label}) Fencing`
-        : `${materialLabels[desiredRoof]} Roofing`;
+  // Dynamic selection map keyed by ServiceId so future services automatically participate.
+  const [selectedByService, setSelectedByService] = useState<Partial<Record<ServiceId, string>>>(() =>
+    Object.fromEntries(
+      groups.map((g) => [
+        g.serviceId,
+        g.tiers.find((t) => t.recommended)?.name ?? g.tiers[0]?.name ?? "Signature",
+      ]),
+    ),
+  );
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [sent, setSent] = useState(false);
 
-  const selectedSummary = [
-    hasRoof ? `${selectedRoofPkg} ${materialLabels[desiredRoof]} Roof` : null,
-    hasFence ? `${selectedFencePkg} ${fenceStyle.label} Fence` : null,
-  ]
-    .filter(Boolean)
+  const selectedSummary = groups
+    .map((g) => {
+      const tier = selectedByService[g.serviceId] ?? g.tiers.find((t) => t.recommended)?.name ?? "Signature";
+      return `${tier} ${g.itemLabel}`;
+    })
     .join(" + ");
+
+  const headingSummary = groups.map((g) => g.itemLabel).join(" + ");
 
   function onSubmitContact(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    if (!form.checkValidity()) {
-      form.reportValidity();
+    const fd = new FormData(form);
+    const result = validateQuickEstimateInquiry({
+      name: fd.get("name"),
+      phone: fd.get("phone"),
+      email: fd.get("email"),
+    });
+
+    if (!result.success) {
+      setFieldErrors(result.fieldErrors);
+      setSent(false);
+      const firstBad = Object.keys(result.fieldErrors)[0];
+      if (firstBad) {
+        const el = form.elements.namedItem(firstBad) as HTMLElement | null;
+        el?.focus();
+      }
       return;
     }
-    const fd = new FormData(form);
+
+    setFieldErrors({});
     const lines = [
-      `Services requested: ${services.map((s) => (s === "roofing" ? "Roofing" : "Fencing")).join(" + ")}`,
+      `Services requested: ${services.map((s) => getServicePlugin(s).label).join(" + ")}`,
       `Selected package(s): ${selectedSummary}`,
-      `Name: ${fd.get("name")}`,
-      `Phone: ${fd.get("phone")}`,
-      `Email: ${fd.get("email")}`,
+      `Name: ${result.data.name}`,
+      `Phone: ${result.data.phone}`,
+      `Email: ${result.data.email}`,
       "",
       "--- 3D Configuration Summary ---",
       ...activeSteps.map((s) => `${s.summaryLabel}: ${labelFor(s, answers)}`),
@@ -180,15 +181,24 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
     setSent(true);
   }
 
+  function clearFieldError(name: string) {
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  }
+
   return (
     <div className="space-y-8">
-      {/* Matching Packages Card */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="eyebrow">Matching packages</p>
             <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl">
-              Your recommended {summaryTitle} packages
+              Your recommended {headingSummary} packages
             </h2>
             <p className="mt-2 text-slate-600">
               Tailored to your{" "}
@@ -209,29 +219,21 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
           </div>
         </div>
 
-        {hasRoof && (
+        {groups.map((group) => (
           <TierList
-            name="roofPackageTier"
-            legend={`Choose ${/^[aeiou]/i.test(materialLabels[desiredRoof]) ? "an" : "a"} ${materialLabels[desiredRoof]} roofing package:`}
-            tiers={roofPackages}
-            selected={selectedRoofPkg}
-            onSelect={setSelectedRoofPkg}
+            key={group.serviceId}
+            group={group}
+            selected={
+              selectedByService[group.serviceId] ??
+              group.tiers.find((t) => t.recommended)?.name ??
+              group.tiers[0]?.name ??
+              "Signature"
+            }
+            onSelect={(tier) => setSelectedByService((prev) => ({ ...prev, [group.serviceId]: tier }))}
             uid={uid}
           />
-        )}
+        ))}
 
-        {hasFence && (
-          <TierList
-            name="fencePackageTier"
-            legend={`Choose ${/^[aeiou]/i.test(fenceStyle.label) ? "an" : "a"} ${fenceStyle.label} (${fenceFinish.label}) fencing package:`}
-            tiers={fencePackages}
-            selected={selectedFencePkg}
-            onSelect={setSelectedFencePkg}
-            uid={uid}
-          />
-        )}
-
-        {/* Tailored project callouts */}
         {callouts.length > 0 && (
           <div className="mt-6 rounded-2xl border border-brand-100 bg-brand-50/70 p-5">
             <h3 className="text-base font-bold text-brand-900">Included based on your design</h3>
@@ -247,9 +249,10 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
         )}
       </div>
 
-      {/* Contact capture to book free inspection */}
+      {/* Zod-validated contact capture */}
       <form
         onSubmit={onSubmitContact}
+        noValidate
         aria-labelledby={`${uid}-contact-h`}
         className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
       >
@@ -272,8 +275,16 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
               required
               autoComplete="name"
               enterKeyHint="next"
+              aria-invalid={fieldErrors.name ? "true" : "false"}
+              aria-describedby={fieldErrors.name ? `${uid}-name-err` : undefined}
+              onChange={() => clearFieldError("name")}
               className="field-control mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 focus:border-brand-700"
             />
+            {fieldErrors.name && (
+              <p id={`${uid}-name-err`} className="mt-1.5 text-xs font-medium text-red-700">
+                <span role="img" aria-label="Error">⚠</span> {fieldErrors.name}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor={`${uid}-phone`} className="block text-sm font-semibold text-slate-800">
@@ -286,8 +297,16 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
               required
               autoComplete="tel"
               enterKeyHint="next"
+              aria-invalid={fieldErrors.phone ? "true" : "false"}
+              aria-describedby={fieldErrors.phone ? `${uid}-phone-err` : undefined}
+              onChange={() => clearFieldError("phone")}
               className="field-control mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 focus:border-brand-700"
             />
+            {fieldErrors.phone && (
+              <p id={`${uid}-phone-err`} className="mt-1.5 text-xs font-medium text-red-700">
+                <span role="img" aria-label="Error">⚠</span> {fieldErrors.phone}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor={`${uid}-email`} className="block text-sm font-semibold text-slate-800">
@@ -300,8 +319,16 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
               required
               autoComplete="email"
               enterKeyHint="done"
+              aria-invalid={fieldErrors.email ? "true" : "false"}
+              aria-describedby={fieldErrors.email ? `${uid}-email-err` : undefined}
+              onChange={() => clearFieldError("email")}
               className="field-control mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 focus:border-brand-700"
             />
+            {fieldErrors.email && (
+              <p id={`${uid}-email-err`} className="mt-1.5 text-xs font-medium text-red-700">
+                <span role="img" aria-label="Error">⚠</span> {fieldErrors.email}
+              </p>
+            )}
           </div>
         </div>
 
@@ -320,7 +347,6 @@ export function PackagesResult({ services, answers, onEditStep, onBackToDecorate
         </p>
       </form>
 
-      {/* Editable answers summary */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <h3 className="text-lg font-extrabold">Your 3D selections</h3>
         <dl className="mt-4 divide-y divide-slate-100">

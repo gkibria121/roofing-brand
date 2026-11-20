@@ -2,30 +2,32 @@
 
 import {
   FENCE_CATALOG,
-  fenceHeightOptions,
-  fencePlacementOptions,
+  FENCE_HEIGHT_OPTIONS,
+  FENCE_PLACEMENT_OPTIONS,
   getFenceFinish,
   getFenceStyle,
-  type FenceHeight,
-  type FencePlacement,
-} from "@/lib/estimate/fences";
+} from "../catalogs/fencing";
 import {
   currentMaterialOptions,
   desiredMaterialOptions,
-  slopeOptions,
-  type Answers,
-  type BuildingType,
-  type Material,
-  type ServiceId,
-  type Slope,
-  type Stories,
-  type YesNo,
-} from "@/lib/estimate/questions";
-import type { PreviewMode } from "@/lib/estimate/sceneConfig";
+  SLOPE_OPTIONS,
+} from "../catalogs/roofing";
+import type {
+  Answers,
+  BuildingType,
+  FenceHeight,
+  FencePlacement,
+  Material,
+  PreviewMode,
+  ServiceId,
+  Slope,
+  Stories,
+  YesNo,
+} from "../domain/schemas";
 import { OptionVisual } from "./OptionVisual";
 
 type Props = {
-  services: ServiceId[];
+  services: readonly ServiceId[];
   answers: Partial<Answers>;
   previewMode: PreviewMode;
   onPreviewModeChange: (mode: PreviewMode) => void;
@@ -70,7 +72,6 @@ export function LiveDecorator({
 
   return (
     <div className="space-y-6">
-      {/* Property shape (shared) */}
       <section aria-label="Building shape" className="space-y-3">
         <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Building &amp; lot</h2>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -106,7 +107,6 @@ export function LiveDecorator({
         </div>
       </section>
 
-      {/* Roofing decoration controls */}
       {hasRoof && (
         <section aria-label="Roof decoration" className="space-y-4 border-t border-slate-200 pt-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -134,7 +134,7 @@ export function LiveDecorator({
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-600">Roof slope</p>
             <div role="group" aria-label="Roof slope" className="grid grid-cols-4 gap-2">
-              {slopeOptions.map((opt) => (
+              {SLOPE_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
@@ -248,7 +248,6 @@ export function LiveDecorator({
         </section>
       )}
 
-      {/* Fencing decoration controls */}
       {hasFence && (
         <section aria-label="Fence decoration" className="space-y-4 border-t border-slate-200 pt-5">
           <div className="flex items-center justify-between">
@@ -260,7 +259,6 @@ export function LiveDecorator({
             </span>
           </div>
 
-          {/* Style selector (auto-generated from FENCE_CATALOG) */}
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-600">Fence style</p>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -287,7 +285,6 @@ export function LiveDecorator({
             </div>
           </div>
 
-          {/* Color / finish swatches */}
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-600">Color &amp; finish</p>
             <div className="flex flex-wrap gap-2">
@@ -319,12 +316,11 @@ export function LiveDecorator({
             </div>
           </div>
 
-          {/* Height + Placement + Gate */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <p className="mb-2 text-xs font-semibold text-slate-600">Height</p>
               <div role="group" aria-label="Fence height" className="grid grid-cols-3 gap-1.5">
-                {fenceHeightOptions.map((opt) => (
+                {FENCE_HEIGHT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
@@ -362,7 +358,7 @@ export function LiveDecorator({
           <div>
             <p className="mb-2 text-xs font-semibold text-slate-600">Placement around house</p>
             <div role="group" aria-label="Fence placement" className="grid grid-cols-3 gap-2">
-              {fencePlacementOptions.map((opt) => (
+              {FENCE_PLACEMENT_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
