@@ -350,6 +350,20 @@ select::picker-icon {
   box-shadow: 0 20px 45px -12px rgb(15 42 74 / 0.2);
 }
 
+.site-header.is-wide .dropdown-list.mega-menu[popover] {
+  inline-size: min(41rem, calc(100dvw - 2rem));
+  max-inline-size: calc(100dvw - 2rem);
+  padding: 1rem;
+  border-radius: 1.5rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 25px 60px -15px rgb(15 42 74 / 0.28);
+}
+
+.site-header.is-wide .dropdown-list.mega-menu:is(:popover-open, .\:popover-open) {
+  display: block;
+}
+
 @supports (position-area: block-end) {
   .site-header.is-wide .dropdown-list[popover] {
     position-area: block-end span-inline-end;

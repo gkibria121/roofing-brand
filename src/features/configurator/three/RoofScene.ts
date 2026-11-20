@@ -204,6 +204,18 @@ export class RoofScene {
     return this.controls.autoRotate;
   }
 
+  /** Toggle full user orbit/pan/zoom controls vs. gentle showcase preview rotation. */
+  setInteractive(enabled: boolean) {
+    this.controls.enabled = enabled;
+    if (!enabled) {
+      this.controls.autoRotateSpeed = 0.55;
+      this.setAutoRotate(!this.reducedMotion);
+    } else {
+      this.controls.autoRotateSpeed = 0.45;
+    }
+    this.invalidate();
+  }
+
   setAutoRotate(on: boolean) {
     this.controls.autoRotate = on;
     this.listeners.onAutoRotateChange?.(on);

@@ -1,16 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef } from "react";
 import { SERVICE_AREAS } from "@/lib/serviceAreas";
-import { productNavItems, site } from "@/lib/site";
+import { productsMegaMenu, site } from "@/lib/site";
 import { Logo } from "./Logo";
 
 interface SubmenuEntry {
   li: HTMLLIElement | null;
   trigger: HTMLButtonElement | null;
-  list: HTMLUListElement | null;
+  list: HTMLElement | null;
 }
 
 type PopoverEl = HTMLElement & {
@@ -40,7 +41,7 @@ export function Header() {
 
   const productsLiRef = useRef<HTMLLIElement>(null);
   const productsBtnRef = useRef<HTMLButtonElement>(null);
-  const productsListRef = useRef<HTMLUListElement>(null);
+  const productsListRef = useRef<HTMLDivElement>(null);
 
   const areasLiRef = useRef<HTMLLIElement>(null);
   const areasBtnRef = useRef<HTMLButtonElement>(null);
@@ -240,7 +241,7 @@ export function Header() {
   }, []);
 
   // Close open navigation popovers whenever route changes.
-  useEffect(() => {
+  function closeAllPopovers() {
     const els = [menuRef.current, productsListRef.current, areasListRef.current] as (PopoverEl | null)[];
     for (const el of els) {
       if (el && isPopoverShown(el)) {
@@ -251,6 +252,10 @@ export function Header() {
         }
       }
     }
+  }
+
+  useEffect(() => {
+    closeAllPopovers();
   }, [pathname]);
 
   const onProducts = pathname.startsWith("/products") || pathname.startsWith("/services");
@@ -316,20 +321,94 @@ export function Header() {
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
-              <ul ref={productsListRef} id={productsMenuId} className="dropdown-list">
-                {productNavItems.map((item) => (
-                  <li key={item.href}>
+              <div ref={productsListRef} id={productsMenuId} className="dropdown-list mega-menu">
+                {/* Top Row: 3D Calculator Hero Promo + Quick Material Links */}
+                <div className="grid gap-3 sm:grid-cols-[1.18fr_1fr]">
+                  {/* Left: 3D Exterior Calculator Promo Card */}
+                  <div className="relative flex min-h-[154px] flex-col justify-between overflow-hidden rounded-2xl border border-brand-800 bg-brand-900 p-4 text-white">
+                    <Image
+                      src={productsMegaMenu.promo.image}
+                      alt=""
+                      fill
+                      sizes="340px"
+                      aria-hidden="true"
+                      className="object-cover object-right opacity-55"
+                    />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-900/90 to-brand-900/25"
+                    />
+                    <div className="relative z-10 max-w-[220px]">
+                      <p className="font-heading text-base font-extrabold leading-tight text-white">
+                        {productsMegaMenu.promo.title}
+                      </p>
+                      <p className="mt-1.5 whitespace-normal text-xs leading-snug text-slate-200">
+                        {productsMegaMenu.promo.description}
+                      </p>
+                    </div>
                     <Link
-                      href={item.href}
-                      aria-current={pathname === item.href ? "page" : undefined}
-                      className="block rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-slate-50 aria-[current=page]:bg-brand-50"
+                      href={productsMegaMenu.promo.href}
+                      onClick={closeAllPopovers}
+                      className="relative z-10 mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/35 bg-brand-900/75 px-3 py-2 text-xs font-bold text-white backdrop-blur transition-colors hover:border-accent-400 hover:bg-accent-600"
                     >
-                      <span className="block text-sm font-bold text-brand-900">{item.label}</span>
-                      <span className="mt-0.5 block whitespace-normal text-xs text-slate-500">{item.description}</span>
+                      <span>{productsMegaMenu.promo.ctaLabel}</span>
+                      <span aria-hidden="true">→</span>
                     </Link>
-                  </li>
-                ))}
-              </ul>
+                  </div>
+
+                  {/* Right: Quick Material Pills + All Products */}
+                  <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50/90 p-3.5">
+                    <div className="grid grid-cols-2 gap-2">
+                      {productsMegaMenu.quickLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeAllPopovers}
+                          className="inline-flex items-center justify-between gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-brand-900 shadow-2xs transition-colors hover:border-accent-600 hover:bg-orange-50/50 hover:text-accent-700"
+                        >
+                          <span className="truncate">{item.label}</span>
+                          <span aria-hidden="true" className="text-slate-400">›</span>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link
+                      href={productsMegaMenu.allLink.href}
+                      onClick={closeAllPopovers}
+                      className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand-900/25 bg-white px-3 py-2 text-xs font-bold text-brand-900 transition-colors hover:border-accent-600 hover:bg-orange-50/60 hover:text-accent-700"
+                    >
+                      <span>{productsMegaMenu.allLink.label}</span>
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Bottom Row: 4 Visual Product Cards */}
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {productsMegaMenu.visualCards.map((card) => (
+                    <Link
+                      key={card.label}
+                      href={card.href}
+                      onClick={closeAllPopovers}
+                      className="group relative aspect-[4/3.7] overflow-hidden rounded-2xl border border-slate-200 bg-brand-900 shadow-xs"
+                    >
+                      <Image
+                        src={card.image}
+                        alt={card.alt}
+                        fill
+                        sizes="(max-width: 640px) 44vw, 155px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"
+                      />
+                      <span className="absolute inset-x-2.5 bottom-2.5 whitespace-normal text-left font-heading text-xs font-extrabold leading-tight text-white drop-shadow-xs sm:text-[13px]">
+                        {card.label}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </li>
 
             {/* How it works */}

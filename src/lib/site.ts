@@ -80,3 +80,49 @@ export const productNavItems = [
     description: "Compare every roof and fence system side by side",
   },
 ] as const;
+
+export const productsMegaMenu = {
+  promo: {
+    title: "3D Exterior Calculator",
+    description: "Build your dream roof & fence and get an estimate instantly",
+    ctaLabel: "Go to 3D calculator",
+    href: "/estimate",
+    image: "/images/hero.jpg",
+  },
+  quickLinks: [
+    { label: "Asphalt", href: "/products/roofing#asphalt" },
+    { label: "Metal Roof", href: "/products/roofing#metal" },
+    { label: "Wood Fence", href: "/products/fencing#wood-privacy" },
+    { label: "Modern Slat", href: "/products/fencing#horizontal-slat" },
+  ],
+  allLink: {
+    label: "All Products",
+    href: "/products",
+  },
+  visualCards: [
+    {
+      label: "Residential Roofing",
+      href: "/products/roofing",
+      image: "/images/residential.jpg",
+      alt: "Residential architectural shingle roof installation",
+    },
+    {
+      label: "Metal & Solar",
+      href: "/products/roofing#metal",
+      image: "/images/metal-roof.jpg",
+      alt: "Standing-seam metal roof with integrated solar panels",
+    },
+    {
+      label: "Custom Fencing",
+      href: "/products/fencing",
+      image: "/images/custom-fence.jpg",
+      alt: "Custom Western Red Cedar horizontal slat backyard fence",
+    },
+    {
+      label: "Commercial",
+      href: "/products/roofing#tpo",
+      image: "/images/commercial.jpg",
+      alt: "Commercial reflective flat TPO roofing system",
+    },
+  ],
+} as const;

@@ -36,7 +36,8 @@ export default function RoofingProductsPage() {
             return (
               <article
                 key={mat.id}
-                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+                id={mat.id}
+                className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
                   <div className="flex items-start gap-4">

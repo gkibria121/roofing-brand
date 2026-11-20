@@ -8,6 +8,7 @@ type Props = {
   config: SceneConfig;
   badges: readonly string[];
   caption?: string;
+  interactive?: boolean;
   onSnapshotGetterReady?: (getter: (() => string | null) | null) => void;
 };
 
@@ -22,12 +23,19 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-export default function HouseViewer({ config, badges, caption, onSnapshotGetterReady }: Props) {
+export default function HouseViewer({
+  config,
+  badges,
+  caption,
+  interactive = true,
+  onSnapshotGetterReady,
+}: Props) {
   const helpId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<RoofScene | null>(null);
   const snapshotCallbackRef = useRef(onSnapshotGetterReady);
+  const initialInteractiveRef = useRef(interactive);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [rotating, setRotating] = useState(false);
@@ -55,6 +63,7 @@ export default function HouseViewer({ config, badges, caption, onSnapshotGetterR
         if (cancelled || !wrapRef.current || !canvasRef.current) return;
         scene = new RoofScene(wrapRef.current, canvasRef.current, { onAutoRotateChange: setRotating });
         sceneRef.current = scene;
+        scene.setInteractive(initialInteractiveRef.current);
         setRotating(scene.getAutoRotate());
         setDescription(scene.setConfig(initialConfigRef.current).description);
         snapshotCallbackRef.current?.(() => scene?.captureSnapshot() ?? null);
@@ -70,6 +79,11 @@ export default function HouseViewer({ config, badges, caption, onSnapshotGetterR
       sceneRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    initialInteractiveRef.current = interactive;
+    sceneRef.current?.setInteractive(interactive);
+  }, [interactive]);
 
   useEffect(() => {
     const next: SceneConfig = {
@@ -129,9 +143,13 @@ export default function HouseViewer({ config, badges, caption, onSnapshotGetterR
           role="img"
           aria-label={description}
           aria-describedby={helpId}
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          className="block size-full cursor-grab touch-pan-y active:cursor-grabbing outline-offset-[-3px] focus-visible:outline-3 focus-visible:outline-accent-600"
+          tabIndex={interactive ? 0 : -1}
+          onKeyDown={interactive ? onKeyDown : undefined}
+          className={`block size-full outline-offset-[-3px] focus-visible:outline-3 focus-visible:outline-accent-600 ${
+            interactive
+              ? "cursor-grab touch-pan-y active:cursor-grabbing"
+              : "pointer-events-none"
+          }`}
         />
 
         {!ready && !failed && (
@@ -159,59 +177,71 @@ export default function HouseViewer({ config, badges, caption, onSnapshotGetterR
                 </span>
               ))}
             </div>
-            <div className="absolute bottom-3 right-3 flex flex-col gap-2" role="group" aria-label="3D view controls">
-              <button
-                type="button"
-                className={btn}
-                onClick={() => sceneRef.current?.focusRoof()}
-                aria-label="Inspect roof close-up"
-                title="Zoom close to inspect roof"
-              >
-                <Icon d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35M11 8v6M8 11h6" />
-              </button>
-              <button
-                type="button"
-                className={btn}
-                onClick={() => sceneRef.current?.orbitBy(0, 0, 0.74)}
-                aria-label="Zoom in"
-                title="Zoom in"
-              >
-                <Icon d="M12 5v14M5 12h14" />
-              </button>
-              <button
-                type="button"
-                className={btn}
-                onClick={() => sceneRef.current?.orbitBy(0, 0, 1.35)}
-                aria-label="Zoom out"
-                title="Zoom out"
-              >
-                <Icon d="M5 12h14" />
-              </button>
-              <button
-                type="button"
-                className={btn}
-                onClick={() => sceneRef.current?.setAutoRotate(!rotating)}
-                aria-pressed={rotating}
-                aria-label="Auto-rotate"
-                title="Toggle auto-rotate"
-              >
-                <Icon d={rotating ? "M8 5v14M16 5v14" : "M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"} />
-              </button>
-              <button
-                type="button"
-                className={btn}
-                onClick={() => sceneRef.current?.resetView()}
-                aria-label="Reset view"
-                title="Reset camera view"
-              >
-                <Icon d="M3 11 12 4l9 7M5 10v10h14V10" />
-              </button>
-            </div>
+            {interactive ? (
+              <div className="absolute bottom-3 right-3 flex flex-col gap-2" role="group" aria-label="3D view controls">
+                <button
+                  type="button"
+                  className={btn}
+                  onClick={() => sceneRef.current?.focusRoof()}
+                  aria-label="Inspect roof close-up"
+                  title="Zoom close to inspect roof"
+                >
+                  <Icon d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35M11 8v6M8 11h6" />
+                </button>
+                <button
+                  type="button"
+                  className={btn}
+                  onClick={() => sceneRef.current?.orbitBy(0, 0, 0.74)}
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  <Icon d="M12 5v14M5 12h14" />
+                </button>
+                <button
+                  type="button"
+                  className={btn}
+                  onClick={() => sceneRef.current?.orbitBy(0, 0, 1.35)}
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  <Icon d="M5 12h14" />
+                </button>
+                <button
+                  type="button"
+                  className={btn}
+                  onClick={() => sceneRef.current?.setAutoRotate(!rotating)}
+                  aria-pressed={rotating}
+                  aria-label="Auto-rotate"
+                  title="Toggle auto-rotate"
+                >
+                  <Icon d={rotating ? "M8 5v14M16 5v14" : "M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"} />
+                </button>
+                <button
+                  type="button"
+                  className={btn}
+                  onClick={() => sceneRef.current?.resetView()}
+                  aria-label="Reset view"
+                  title="Reset camera view"
+                >
+                  <Icon d="M3 11 12 4l9 7M5 10v10h14V10" />
+                </button>
+              </div>
+            ) : (
+              <div className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-center">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/92 px-3.5 py-1.5 text-xs font-bold text-brand-900 shadow-sm backdrop-blur">
+                  <span className="size-2 rounded-full bg-accent-600" aria-hidden="true" />
+                  Enter your ZIP &amp; pick an address to unlock interactive 3D controls
+                </span>
+              </div>
+            )}
           </>
         )}
       </div>
       <figcaption id={helpId} className="mt-2.5 text-center text-xs text-slate-500">
-        {caption ?? "Drag to rotate · right-drag to pan · scroll or pinch to zoom close · arrow keys when focused"}
+        {caption ??
+          (interactive
+            ? "Drag to rotate · right-drag to pan · scroll or pinch to zoom close · arrow keys when focused"
+            : "3D architectural preview — choose your property address to rotate, zoom, and customize live")}
       </figcaption>
     </figure>
   );

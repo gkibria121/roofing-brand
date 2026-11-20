@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import {
-  SAMPLE_ZIPS,
   createCustomPropertyAddress,
   lookupAddressesByZip,
   type ZipLookupResult,
@@ -12,9 +11,10 @@ import type { PropertyAddress } from "../domain/schemas";
 type Props = {
   initialZip?: string;
   onSelectAddress: (address: PropertyAddress) => void;
+  onHighlightAddress?: (address: PropertyAddress | null) => void;
 };
 
-export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
+export function ZipAddressLookup({ initialZip = "", onSelectAddress, onHighlightAddress }: Props) {
   const uid = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [zipInput, setZipInput] = useState(initialZip.replace(/\D/g, "").slice(0, 5));
@@ -52,6 +52,11 @@ export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
   }, [cleanZip]);
 
   const addresses = activeResult?.addresses ?? [];
+  const highlighted = activeResult?.addresses[activeIndex] ?? null;
+
+  useEffect(() => {
+    onHighlightAddress?.(highlighted);
+  }, [highlighted, onHighlightAddress]);
 
   function handleZipChange(raw: string) {
     const next = raw.replace(/\D/g, "").slice(0, 5);
@@ -91,9 +96,9 @@ export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
   const hintId = `${uid}-hint`;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-md sm:p-10">
-        <div className="text-center">
+    <div className="w-full">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-md sm:p-8">
+        <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-900">
             <svg viewBox="0 0 24 24" className="size-3.5 text-accent-600" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
@@ -101,20 +106,20 @@ export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
             </svg>
             Step 1 of 3 · Property Lookup
           </span>
-          <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-brand-900 sm:text-3xl">
-            Enter your ZIP code to start your 3D estimate
+          <h2 className="mt-3.5 text-2xl font-extrabold tracking-tight text-brand-900">
+            Enter your property ZIP code
           </h2>
-          <p className="mt-2 text-sm text-slate-600 sm:text-base">
-            Select your property address below to open the interactive 3D house &amp; fence configurator.
+          <p className="mt-1.5 text-sm text-slate-600">
+            Select your property address below to unlock the interactive 3D house &amp; fence configurator.
           </p>
         </div>
 
-        <div className="mt-7">
+        <div className="mt-6">
           <label htmlFor={zipInputId} className="block text-sm font-bold text-brand-900">
             Property ZIP code
           </label>
           <p id={hintId} className="mt-1 text-xs text-slate-500">
-            Type any 5-digit US ZIP code (for example 75081) to see matching addresses.
+            Type any 5-digit US ZIP code to see matching addresses.
           </p>
 
           <div className="relative mt-2.5">
@@ -137,7 +142,7 @@ export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
               value={zipInput}
               onChange={(e) => handleZipChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter 5-digit ZIP code (e.g. 75081)"
+              placeholder="75081"
               role="combobox"
               aria-expanded={addresses.length > 0}
               aria-controls={listboxId}
@@ -163,22 +168,7 @@ export function ZipAddressLookup({ initialZip = "", onSelectAddress }: Props) {
               </button>
             )}
           </div>
-
-          {!activeResult && !loading && (
-            <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span>Try a sample ZIP:</span>
-              {SAMPLE_ZIPS.map((z) => (
-                <button
-                  key={z}
-                  type="button"
-                  onClick={() => handleZipChange(z)}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-brand-900 transition-colors hover:border-accent-600 hover:bg-orange-50/50"
-                >
-                  {z}
-                </button>
-              ))}
-            </div>
-          )}
+ 
 
           {loading && (
             <div role="status" className="mt-4 flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-medium text-slate-600">

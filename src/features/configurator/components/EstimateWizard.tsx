@@ -50,12 +50,13 @@ export function EstimateWizard() {
   const searchParams = useSearchParams();
   const initialFromUrl = useMemo(() => parseConfiguratorState(searchParams), [searchParams]);
 
-  // Starts on the clean ZIP lookup gate unless a shared 3D URL is opened directly.
+  // Starts on the 3D preview + ZIP lookup gate unless a shared 3D URL is opened directly.
   const [stage, setStage] = useState<Stage>(() => (initialFromUrl ? "configure" : "lookup"));
   const [returnToQuoteAfterAddress, setReturnToQuoteAfterAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<PropertyAddress | null>(() =>
     initialFromUrl ? FALLBACK_SHARED_ADDRESS : null,
   );
+  const [highlightedAddress, setHighlightedAddress] = useState<PropertyAddress | null>(null);
 
   const [services, setServices] = useState<ServiceId[]>(() => initialFromUrl?.services ?? ["roofing"]);
   const [mode, setMode] = useState<Mode>(() => initialFromUrl?.mode ?? "guided");
@@ -101,6 +102,35 @@ export function EstimateWizard() {
     () => deriveScene(answers, previewMode, services),
     [answers, previewMode, services],
   );
+
+  // Showcase 3D house shown on the left during Stage 1 (ZIP lookup); adapts to highlighted address shape.
+  const showcaseScene = useMemo(() => {
+    const bt = highlightedAddress?.suggestedBuildingType ?? "residential";
+    const st = highlightedAddress?.suggestedStories ?? "multiple";
+    const previewAnswers: Partial<Answers> = {
+      buildingType: bt,
+      stories: st,
+      slope: bt === "commercial" ? "flat" : "moderate",
+      desiredType: bt === "commercial" ? "tpo" : "metal",
+      solar: "no",
+      fenceStyle: "wood-privacy",
+      fenceFinish: "natural-cedar",
+      fenceHeight: "6ft",
+      fencePlacement: "backyard",
+      fenceGate: "yes",
+    };
+    const derived = deriveScene(previewAnswers, "new", ["roofing", "fencing"]);
+    return {
+      config: derived.config,
+      badges: highlightedAddress
+        ? [
+            "3D Preview",
+            highlightedAddress.street,
+            `${highlightedAddress.city}, ${highlightedAddress.state} ${highlightedAddress.zip}`,
+          ]
+        : ["3D Property Preview", "Roofing & Fencing"],
+    };
+  }, [highlightedAddress]);
 
   const handleSnapshotGetterReady = useCallback((getter: (() => string | null) | null) => {
     snapshotGetterRef.current = getter;
@@ -322,218 +352,227 @@ export function EstimateWizard() {
         {announcement}
       </div>
 
-      {/* STAGE 1: Clean ZIP Code → Possible Addresses Gate */}
-      {stage === "lookup" && (
-        <ZipAddressLookup
-          initialZip={selectedAddress?.zip ?? ""}
-          onSelectAddress={handleSelectAddress}
-        />
-      )}
-
-      {/* STAGE 2: Interactive 3D Property Configurator */}
-      {stage === "configure" && (
+      {/* STAGES 1 & 2: Left 3D House (Showcase Preview -> Full Interactive) + Right ZIP Lookup / Studio */}
+      {(stage === "lookup" || stage === "configure") && (
         <div>
-          {/* Selected property bar + 3-stage breadcrumb */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-5">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-900 text-white" aria-hidden="true">
-                <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
-                  <circle cx="12" cy="10" r="2.2" />
-                </svg>
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-extrabold text-brand-900">
-                  {selectedAddress?.street ?? FALLBACK_SHARED_ADDRESS.street}
-                </p>
-                <p className="truncate text-xs text-slate-500">
-                  {selectedAddress
-                    ? `${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}, ${selectedAddress.country}`
-                    : `${FALLBACK_SHARED_ADDRESS.city}, ${FALLBACK_SHARED_ADDRESS.state} ${FALLBACK_SHARED_ADDRESS.zip}, USA`}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleChangeAddress(false)}
-                className="ml-1 shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-brand-900 transition-colors hover:border-brand-700 hover:bg-brand-50"
-              >
-                Change address
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              {(editingConfigId || addingConfig) && savedConfigs.length > 0 && (
+          {/* Selected property bar + 3-stage breadcrumb (shown once address is picked) */}
+          {stage === "configure" && (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-900 text-white" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
+                    <circle cx="12" cy="10" r="2.2" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-extrabold text-brand-900">
+                    {selectedAddress?.street ?? FALLBACK_SHARED_ADDRESS.street}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">
+                    {selectedAddress
+                      ? `${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}, ${selectedAddress.country}`
+                      : `${FALLBACK_SHARED_ADDRESS.city}, ${FALLBACK_SHARED_ADDRESS.state} ${FALLBACK_SHARED_ADDRESS.zip}, USA`}
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setEditingConfigId(null);
-                    setAddingConfig(false);
-                    setStage("quote");
-                  }}
-                  className="rounded-full border border-accent-600/30 bg-orange-50 px-3 py-1 text-accent-700 hover:bg-orange-100"
+                  onClick={() => handleChangeAddress(false)}
+                  className="ml-1 shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-brand-900 transition-colors hover:border-brand-700 hover:bg-brand-50"
                 >
-                  ← Back to quote ({savedConfigs.length})
+                  Change address
                 </button>
-              )}
-              <ol className="hidden items-center gap-1.5 sm:flex" aria-label="Estimate stages">
-                <li className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-800">1. Address ✓</li>
-                <li className="text-slate-300" aria-hidden="true">→</li>
-                <li className="rounded-full bg-brand-900 px-2.5 py-1 text-white">2. 3D Estimate</li>
-                <li className="text-slate-300" aria-hidden="true">→</li>
-                <li className="rounded-full bg-white px-2.5 py-1 text-slate-500">3. Custom Quote</li>
-              </ol>
-            </div>
-          </div>
+              </div>
 
-          <div className="grid items-start gap-8 lg:grid-cols-[1.08fr_1fr] lg:gap-10">
-            {/* Left column: Sticky live 3D Building, Roof & Fence Model */}
-            <div className="lg:sticky lg:top-24">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                {(editingConfigId || addingConfig) && savedConfigs.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingConfigId(null);
+                      setAddingConfig(false);
+                      setStage("quote");
+                    }}
+                    className="rounded-full border border-accent-600/30 bg-orange-50 px-3 py-1 text-accent-700 hover:bg-orange-100"
+                  >
+                    ← Back to quote ({savedConfigs.length})
+                  </button>
+                )}
+                <ol className="hidden items-center gap-1.5 sm:flex" aria-label="Estimate stages">
+                  <li className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-800">1. Address ✓</li>
+                  <li className="text-slate-300" aria-hidden="true">→</li>
+                  <li className="rounded-full bg-brand-900 px-2.5 py-1 text-white">2. 3D Estimate</li>
+                  <li className="text-slate-300" aria-hidden="true">→</li>
+                  <li className="rounded-full bg-white px-2.5 py-1 text-slate-500">3. Custom Quote</li>
+                </ol>
+              </div>
+            </div>
+          )}
+
+          <div className="grid items-start gap-8 md:grid-cols-[1.06fr_1fr] lg:gap-10">
+            {/* Left column: Always-mounted 3D House (showcase preview in Stage 1, full interactive in Stage 2) */}
+            <div className="md:sticky md:top-24">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-brand-700">
-                    Live 3D property preview
+                    {stage === "lookup" ? "3D Property Preview" : "Live 3D property preview"}
                   </p>
                   <p className="text-xs text-slate-500">
-                    Customize roofing, fencing, or both — watch your property update live
+                    {stage === "lookup"
+                      ? "Enter your ZIP code and pick an address to unlock full 3D customization"
+                      : "Customize roofing, fencing, or both — watch your property update live"}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {canCompare && (
-                    <div
-                      role="group"
-                      aria-label="3D roof preview mode"
-                      className="inline-flex rounded-full border border-slate-200 bg-slate-100 p-1"
-                    >
-                      <button
-                        type="button"
-                        aria-pressed={previewMode === "current"}
-                        onClick={() => setPreviewMode("current")}
-                        className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                          previewMode === "current"
-                            ? "bg-white text-brand-900 shadow-xs"
-                            : "text-slate-600 hover:text-brand-900"
-                        }`}
+                {stage === "configure" && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {canCompare && (
+                      <div
+                        role="group"
+                        aria-label="3D roof preview mode"
+                        className="inline-flex rounded-full border border-slate-200 bg-slate-100 p-1"
                       >
-                        Current roof
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={previewMode === "new"}
-                        onClick={() => setPreviewMode("new")}
-                        className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
-                          previewMode === "new"
-                            ? "bg-accent-600 text-white shadow-xs"
-                            : "text-slate-600 hover:text-brand-900"
-                        }`}
-                      >
-                        New roof
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          type="button"
+                          aria-pressed={previewMode === "current"}
+                          onClick={() => setPreviewMode("current")}
+                          className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                            previewMode === "current"
+                              ? "bg-white text-brand-900 shadow-xs"
+                              : "text-slate-600 hover:text-brand-900"
+                          }`}
+                        >
+                          Current roof
+                        </button>
+                        <button
+                          type="button"
+                          aria-pressed={previewMode === "new"}
+                          onClick={() => setPreviewMode("new")}
+                          className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                            previewMode === "new"
+                              ? "bg-accent-600 text-white shadow-xs"
+                              : "text-slate-600 hover:text-brand-900"
+                          }`}
+                        >
+                          New roof
+                        </button>
+                      </div>
+                    )}
 
-                  <button
-                    type="button"
-                    onClick={handleCopyShareLink}
-                    className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-brand-900 shadow-xs transition-colors hover:bg-slate-50"
-                  >
-                    <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                    </svg>
-                    {copiedLink ? "Link copied" : "Share 3D"}
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyShareLink}
+                      className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-brand-900 shadow-xs transition-colors hover:bg-slate-50"
+                    >
+                      <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      {copiedLink ? "Link copied" : "Share 3D"}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <HouseViewerLazy
-                config={config}
-                badges={badges}
+                interactive={stage === "configure"}
+                config={stage === "lookup" ? showcaseScene.config : config}
+                badges={stage === "lookup" ? showcaseScene.badges : badges}
                 onSnapshotGetterReady={handleSnapshotGetterReady}
               />
 
-              <dl className="mt-4 grid grid-cols-3 gap-2.5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-center text-xs">
-                {specSummary.map((item) => (
-                  <div key={item.label}>
-                    <dt className="font-medium text-slate-500">{item.label}</dt>
-                    <dd className="mt-0.5 font-bold capitalize text-brand-900">{item.value}</dd>
-                  </div>
-                ))}
-              </dl>
+              {stage === "configure" && (
+                <dl className="mt-4 grid grid-cols-3 gap-2.5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-center text-xs">
+                  {specSummary.map((item) => (
+                    <div key={item.label}>
+                      <dt className="font-medium text-slate-500">{item.label}</dt>
+                      <dd className="mt-0.5 font-bold capitalize text-brand-900">{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </div>
 
-            {/* Right column: Service Selector + Guided / Live Decorator */}
-            <div className="space-y-5">
-              <ServiceSelector selected={services} notice={serviceNotice} onToggle={handleToggleService} />
+            {/* Right column: Stage 1 ZIP Lookup OR Stage 2 Service Selector + Guided / Live Decorator */}
+            {stage === "lookup" ? (
+              <ZipAddressLookup
+                initialZip={selectedAddress?.zip ?? ""}
+                onSelectAddress={handleSelectAddress}
+                onHighlightAddress={setHighlightedAddress}
+              />
+            ) : (
+              <div className="space-y-5">
+                <ServiceSelector selected={services} notice={serviceNotice} onToggle={handleToggleService} />
 
-              <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div
-                  role="tablist"
-                  aria-label="Design mode"
-                  onKeyDown={onTabKeyDown}
-                  className="flex border-b border-slate-200 px-6 pt-2"
-                >
-                  <button
-                    ref={guidedTabRef}
-                    id={guidedTabId}
-                    type="button"
-                    role="tab"
-                    aria-selected={mode === "guided"}
-                    tabIndex={mode === "guided" ? 0 : -1}
-                    onClick={() => switchMode("guided")}
-                    className="mode-tab cursor-pointer px-4 py-3.5 text-sm font-bold text-slate-600 transition-colors hover:text-brand-900"
+                <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div
+                    role="tablist"
+                    aria-label="Design mode"
+                    onKeyDown={onTabKeyDown}
+                    className="flex border-b border-slate-200 px-6 pt-2"
                   >
-                    Guided Steps
-                  </button>
-                  <button
-                    ref={decorateTabRef}
-                    id={decorateTabId}
-                    type="button"
-                    role="tab"
-                    aria-selected={mode === "decorate"}
-                    tabIndex={mode === "decorate" ? 0 : -1}
-                    onClick={() => switchMode("decorate")}
-                    className="mode-tab cursor-pointer px-4 py-3.5 text-sm font-bold text-slate-600 transition-colors hover:text-brand-900"
-                  >
-                    Decorate in 3D
-                  </button>
-                </div>
+                    <button
+                      ref={guidedTabRef}
+                      id={guidedTabId}
+                      type="button"
+                      role="tab"
+                      aria-selected={mode === "guided"}
+                      tabIndex={mode === "guided" ? 0 : -1}
+                      onClick={() => switchMode("guided")}
+                      className="mode-tab cursor-pointer px-4 py-3.5 text-sm font-bold text-slate-600 transition-colors hover:text-brand-900"
+                    >
+                      Guided Steps
+                    </button>
+                    <button
+                      ref={decorateTabRef}
+                      id={decorateTabId}
+                      type="button"
+                      role="tab"
+                      aria-selected={mode === "decorate"}
+                      tabIndex={mode === "decorate" ? 0 : -1}
+                      onClick={() => switchMode("decorate")}
+                      className="mode-tab cursor-pointer px-4 py-3.5 text-sm font-bold text-slate-600 transition-colors hover:text-brand-900"
+                    >
+                      Decorate in 3D
+                    </button>
+                  </div>
 
-                <div role="tabpanel" aria-labelledby={guidedTabId} hidden={mode !== "guided"}>
-                  <GuidedSteps
-                    steps={activeSteps}
-                    stepIndex={safeIndex}
-                    maxReached={maxReached}
-                    answers={answers}
-                    error={error}
-                    editingFromResults={Boolean(editingConfigId)}
-                    allRequiredAnswered={allRequiredAnswered}
-                    headingRef={headingRef}
-                    firstRadioRef={firstRadioRef}
-                    onSelect={handleUpdateAnswer}
-                    onGoToStep={goToStep}
-                    onBack={handleBack}
-                    onSubmit={handleSubmitStep}
-                    onBackToPackages={proceedToQuote}
-                    finishLabel={finishLabel}
-                  />
-                </div>
-
-                <div role="tabpanel" aria-labelledby={decorateTabId} hidden={mode !== "decorate"}>
-                  <div className="p-6 sm:p-8">
-                    <LiveDecorator
-                      services={services}
+                  <div role="tabpanel" aria-labelledby={guidedTabId} hidden={mode !== "guided"}>
+                    <GuidedSteps
+                      steps={activeSteps}
+                      stepIndex={safeIndex}
+                      maxReached={maxReached}
                       answers={answers}
-                      previewMode={previewMode}
-                      onPreviewModeChange={setPreviewMode}
-                      onUpdate={handleUpdateAnswer}
-                      onShowPackages={proceedToQuote}
-                      ctaLabel={`${finishLabel} →`}
+                      error={error}
+                      editingFromResults={Boolean(editingConfigId)}
+                      allRequiredAnswered={allRequiredAnswered}
+                      headingRef={headingRef}
+                      firstRadioRef={firstRadioRef}
+                      onSelect={handleUpdateAnswer}
+                      onGoToStep={goToStep}
+                      onBack={handleBack}
+                      onSubmit={handleSubmitStep}
+                      onBackToPackages={proceedToQuote}
+                      finishLabel={finishLabel}
                     />
+                  </div>
+
+                  <div role="tabpanel" aria-labelledby={decorateTabId} hidden={mode !== "decorate"}>
+                    <div className="p-6 sm:p-8">
+                      <LiveDecorator
+                        services={services}
+                        answers={answers}
+                        previewMode={previewMode}
+                        onPreviewModeChange={setPreviewMode}
+                        onUpdate={handleUpdateAnswer}
+                        onShowPackages={proceedToQuote}
+                        ctaLabel={`${finishLabel} →`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

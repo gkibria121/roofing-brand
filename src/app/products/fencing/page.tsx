@@ -33,7 +33,8 @@ export default function FencingProductsPage() {
             return (
               <article
                 key={fence.id}
-                className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
+                id={fence.id}
+                className="flex scroll-mt-24 flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
               >
                 <div>
                   <div className="flex flex-wrap items-start justify-between gap-3">
