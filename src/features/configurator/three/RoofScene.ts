@@ -264,6 +264,17 @@ export class RoofScene {
     this.invalidate();
   }
 
+  /** Renders one crisp frame synchronously and exports a compact JPEG data URL thumbnail. */
+  captureSnapshot(): string | null {
+    if (this.contextLost) return null;
+    try {
+      this.renderer.render(this.scene, this.camera);
+      return this.renderer.domElement.toDataURL("image/jpeg", 0.82);
+    } catch {
+      return null;
+    }
+  }
+
   private enforceExterior(resetPrev = false) {
     if (!this.house) return;
     const clamped = keepCameraOutside(

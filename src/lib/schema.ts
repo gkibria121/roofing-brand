@@ -64,11 +64,16 @@ export function websiteSchema() {
   };
 }
 
-export function faqSchema() {
+export function faqSchema(
+  customFaqs?: readonly { question: string; answer: string }[],
+) {
+  const entries = customFaqs
+    ? customFaqs.map((f) => ({ q: f.question, a: f.answer }))
+    : faqs;
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
+    mainEntity: entries.map((f) => ({
       "@type": "Question",
       name: f.q,
       acceptedAnswer: { "@type": "Answer", text: f.a },

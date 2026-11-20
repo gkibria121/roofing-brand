@@ -8,6 +8,7 @@ type Props = {
   config: SceneConfig;
   badges: readonly string[];
   caption?: string;
+  onSnapshotGetterReady?: (getter: (() => string | null) | null) => void;
 };
 
 const btn =
@@ -21,15 +22,20 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-export default function HouseViewer({ config, badges, caption }: Props) {
+export default function HouseViewer({ config, badges, caption, onSnapshotGetterReady }: Props) {
   const helpId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<RoofScene | null>(null);
+  const snapshotCallbackRef = useRef(onSnapshotGetterReady);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [rotating, setRotating] = useState(false);
   const [description, setDescription] = useState("Interactive 3D architectural model of your building.");
+
+  useEffect(() => {
+    snapshotCallbackRef.current = onSnapshotGetterReady;
+  }, [onSnapshotGetterReady]);
 
   const { slope, stories, buildingType, material, weathering, damaged, solar, fence } = config;
   const fEnabled = fence?.enabled ?? false;
@@ -51,6 +57,7 @@ export default function HouseViewer({ config, badges, caption }: Props) {
         sceneRef.current = scene;
         setRotating(scene.getAutoRotate());
         setDescription(scene.setConfig(initialConfigRef.current).description);
+        snapshotCallbackRef.current?.(() => scene?.captureSnapshot() ?? null);
         setReady(true);
       } catch {
         if (!cancelled) setFailed(true);
@@ -58,6 +65,7 @@ export default function HouseViewer({ config, badges, caption }: Props) {
     })();
     return () => {
       cancelled = true;
+      snapshotCallbackRef.current?.(null);
       scene?.dispose();
       sceneRef.current = null;
     };

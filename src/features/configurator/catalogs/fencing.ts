@@ -36,6 +36,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "wood-privacy",
     defaultFinishId: "natural-cedar",
     defaultHeight: "6ft",
+    pricePerLinearFt: 28.5,
     finishes: [
       { id: "natural-cedar", label: "Natural Cedar", color: "#9c6b43" },
       { id: "espresso", label: "Espresso Stain", color: "#4e3628" },
@@ -67,6 +68,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "vinyl-privacy",
     defaultFinishId: "classic-white",
     defaultHeight: "6ft",
+    pricePerLinearFt: 36.0,
     finishes: [
       { id: "classic-white", label: "Classic White", color: "#f3f4f6" },
       { id: "warm-almond", label: "Warm Almond", color: "#dfd5c3" },
@@ -98,6 +100,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "ornamental-iron",
     defaultFinishId: "satin-black",
     defaultHeight: "4ft",
+    pricePerLinearFt: 42.0,
     finishes: [
       { id: "satin-black", label: "Satin Black", color: "#1f242b" },
       { id: "arch-bronze", label: "Architectural Bronze", color: "#4a3b31" },
@@ -128,6 +131,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "picket",
     defaultFinishId: "crisp-white",
     defaultHeight: "4ft",
+    pricePerLinearFt: 25.87,
     finishes: [
       { id: "crisp-white", label: "Crisp White", color: "#f4f5f7" },
       { id: "natural-cedar", label: "Natural Cedar", color: "#a4724a" },
@@ -159,6 +163,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "horizontal-slat",
     defaultFinishId: "warm-redwood",
     defaultHeight: "6ft",
+    pricePerLinearFt: 48.5,
     finishes: [
       { id: "warm-redwood", label: "Warm Redwood", color: "#8f5136", postColor: "#20242a" },
       { id: "natural-cedar", label: "Natural Cedar", color: "#aa7b4e", postColor: "#20242a" },
@@ -190,6 +195,7 @@ export const FENCE_CATALOG: readonly FenceStyleDef[] = [
     geometry: "chain-link",
     defaultFinishId: "black-vinyl",
     defaultHeight: "6ft",
+    pricePerLinearFt: 21.5,
     finishes: [
       { id: "black-vinyl", label: "Black Vinyl-Coated", color: "#262b31" },
       { id: "galvanized", label: "Galvanized Steel", color: "#9da5ae" },

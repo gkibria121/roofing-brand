@@ -33,6 +33,7 @@ type Props = {
   onPreviewModeChange: (mode: PreviewMode) => void;
   onUpdate: <K extends keyof Answers>(id: K, value: Answers[K]) => void;
   onShowPackages: () => void;
+  ctaLabel?: string;
 };
 
 const pillBase =
@@ -47,6 +48,7 @@ export function LiveDecorator({
   onPreviewModeChange,
   onUpdate,
   onShowPackages,
+  ctaLabel = "Continue to custom quote →",
 }: Props) {
   const hasRoof = services.includes("roofing");
   const hasFence = services.includes("fencing");
@@ -378,7 +380,7 @@ export function LiveDecorator({
 
       <div className="border-t border-slate-100 pt-4">
         <button type="button" onClick={onShowPackages} className="btn btn-primary btn-lg w-full">
-          View matching packages →
+          {ctaLabel}
         </button>
       </div>
     </div>

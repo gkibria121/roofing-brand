@@ -169,8 +169,239 @@ select::picker-icon {
     inset: auto 0 0;
     border-block-end: 3px solid var(--color-accent-600);
   }
+
+  /* Native branded checkbox using accent-color with accessible @supports fallback. */
+  .brand-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    cursor: pointer;
+    position: relative;
+  }
+  .brand-checkbox {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex-shrink: 0;
+    accent-color: var(--color-accent-600);
+    cursor: pointer;
+  }
+  @supports not (accent-color: #d9480f) {
+    .brand-checkbox-label {
+      padding-left: 1.85rem;
+    }
+    .brand-checkbox {
+      position: absolute !important;
+      clip-path: inset(50%) !important;
+      overflow: hidden !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+    .brand-checkbox + span::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 2px solid #94a3b8;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .brand-checkbox:checked + span::before {
+      background-color: var(--color-accent-600);
+      border-color: var(--color-accent-600);
+    }
+    .brand-checkbox:checked + span::after {
+      content: "✓";
+      position: absolute;
+      left: 0.22rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .brand-checkbox:focus-visible + span::before {
+      outline: 3px solid var(--color-accent-600);
+      outline-offset: 2px;
+    }
+  }
 }
 
 @media (forced-colors: active) {
   .btn-primary { border: 2px solid ButtonText; }
+  .site-header [aria-current="page"] { text-decoration: underline; }
+}
+
+/* ==========================================================================
+   Responsive Site Navigation (single semantic nav tree, native Popover API,
+   CSS Anchor Positioning with JS/fixed fallback, ResizeObserver overflow)
+   ========================================================================== */
+.site-header.is-measuring * {
+  transition: none !important;
+}
+
+.site-header-inner > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.site-header .menu-button {
+  anchor-name: --site-menu-button;
+}
+
+/* Narrow / default collapsed layout: native popover menu */
+.site-header .site-menu {
+  position: fixed;
+  inset: auto;
+  inset-block-start: 4.75rem;
+  inset-block-start: anchor(--site-menu-button bottom);
+  inset-inline-end: 1rem;
+  inline-size: min(88dvw, 24rem);
+  max-inline-size: calc(100dvw - 2rem);
+  block-size: fit-content;
+  max-block-size: calc(100dvh - 6rem);
+  margin: 0;
+  margin-block-start: 0.5rem;
+  padding: 0.75rem;
+  overflow: auto;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 20px 45px -12px rgb(15 42 74 / 0.22);
+}
+
+.site-header .site-menu:not(:is(:popover-open, .\:popover-open)) {
+  display: none;
+}
+
+.site-header .site-menu:is(:popover-open, .\:popover-open) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.site-header .dropdown-list[hidden] {
+  display: none;
+}
+
+.site-header .dropdown-trigger[aria-expanded="true"] .nav-chevron {
+  transform: rotate(180deg);
+}
+
+/* Wide layout: inline navigation bar (toggled by ResizeObserver measurement) */
+.site-header.is-wide .menu-button {
+  display: none;
+}
+
+.site-header.is-wide .site-menu {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+  inline-size: auto;
+  max-inline-size: none;
+  block-size: auto;
+  max-block-size: none;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-header.is-wide .site-menu::backdrop {
+  display: none;
+}
+
+.site-header.is-wide .nav-utility-sep {
+  border-top: 0;
+  padding-top: 0;
+  margin-inline-start: 0.25rem;
+}
+
+.site-header.is-wide .nav-cta-item {
+  padding-top: 0;
+  margin-inline-start: 0.25rem;
+}
+
+.site-header.is-wide .dropdown-list[popover] {
+  position: absolute;
+  inset: auto;
+  height: auto;
+  inline-size: max-content;
+  min-inline-size: 16.5rem;
+  max-inline-size: min(22rem, calc(100dvw - 2rem));
+  margin: 0;
+  margin-block-start: 0.5rem;
+  padding: 0.5rem;
+  overflow: visible;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 20px 45px -12px rgb(15 42 74 / 0.2);
+}
+
+@supports (position-area: block-end) {
+  .site-header.is-wide .dropdown-list[popover] {
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+  }
+}
+
+@supports not (position-area: block-end) {
+  .site-header.is-wide .dropdown-list[popover] {
+    position: fixed;
+    margin: 0;
+  }
+}
+
+/* Pointer bridge over the 0.5rem gap above wide submenus */
+.site-header.is-wide .dropdown-list::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 100%;
+  block-size: 0.65rem;
+}
+
+.site-header.is-wide .dropdown-list:not(:is(:popover-open, .\:popover-open)) {
+  display: none;
+}
+
+.site-header.is-wide .dropdown-list:is(:popover-open, .\:popover-open) {
+  display: grid;
+  gap: 0.125rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-header .site-menu[popover],
+  .site-header.is-wide .dropdown-list[popover] {
+    opacity: 0;
+    translate: 0 -4px;
+    transition: opacity 0.16s ease, translate 0.16s ease, display 0.16s, overlay 0.16s;
+    transition-behavior: allow-discrete;
+  }
+
+  .site-header .site-menu:is(:popover-open, .\:popover-open),
+  .site-header.is-wide .dropdown-list:is(:popover-open, .\:popover-open) {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @starting-style {
+    .site-header .site-menu:is(:popover-open, .\:popover-open),
+    .site-header.is-wide .dropdown-list:is(:popover-open, .\:popover-open) {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
 }

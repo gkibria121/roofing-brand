@@ -33,6 +33,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: true,
     offeredAsNew: true,
     baseColor: "#3b4047",
+    pricePerSqFt: 5.25,
     pbr: { tile: 2.1, roughness: 0.92, metalness: 0.02, bump: 0.055 },
     packages: [
       { name: "Essential", tagline: "Reliable protection at a great value", features: ["Architectural asphalt shingles", "Synthetic underlayment", "Full tear-off & clean-up", "10-year workmanship warranty"] },
@@ -48,6 +49,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: true,
     offeredAsNew: true,
     baseColor: "#56636d",
+    pricePerSqFt: 9.85,
     pbr: { tile: 1.5, roughness: 0.34, metalness: 0.68, bump: 0.03 },
     packages: [
       { name: "Essential", tagline: "Exposed-fastener metal panels", features: ["Ribbed galvalume panels", "Synthetic underlayment", "Trim, flashing & closures", "10-year workmanship warranty"] },
@@ -63,6 +65,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: true,
     offeredAsNew: false,
     baseColor: "#ad4d34",
+    pricePerSqFt: 11.4,
     pbr: { tile: 2.0, roughness: 0.72, metalness: 0.02, bump: 0.085 },
     packages: [],
   },
@@ -74,6 +77,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: true,
     offeredAsNew: false,
     baseColor: "#875a3a",
+    pricePerSqFt: 10.6,
     pbr: { tile: 2.0, roughness: 0.88, metalness: 0.0, bump: 0.065 },
     packages: [],
   },
@@ -85,6 +89,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: false,
     offeredAsNew: true,
     baseColor: "#eceff1",
+    pricePerSqFt: 7.45,
     pbr: { tile: 4.0, roughness: 0.56, metalness: 0.02, bump: 0.02 },
     packages: [
       { name: "Essential", tagline: "Single-ply TPO membrane", features: ["45-mil white TPO membrane", "Mechanically attached", "New flashing at penetrations", "10-year workmanship warranty"] },
@@ -100,6 +105,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: false,
     offeredAsNew: false,
     baseColor: "#282b2f",
+    pricePerSqFt: 7.1,
     pbr: { tile: 4.0, roughness: 0.88, metalness: 0.0, bump: 0.02 },
     packages: [],
   },
@@ -111,6 +117,7 @@ export const ROOF_MATERIAL_CATALOG: readonly RoofMaterialDef[] = [
     supportsPitched: false,
     offeredAsNew: true,
     baseColor: "#575a5f",
+    pricePerSqFt: 6.75,
     pbr: { tile: 3.0, roughness: 0.94, metalness: 0.0, bump: 0.04 },
     packages: [
       { name: "Essential", tagline: "Two-ply modified bitumen", features: ["Base sheet + cap sheet", "Torch or cold-applied", "New flashing at penetrations", "10-year workmanship warranty"] },

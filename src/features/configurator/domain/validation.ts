@@ -3,12 +3,14 @@ import { SERVICE_REGISTRY } from "./registry";
 import {
   AnswersSchema,
   ContactInquirySchema,
+  CustomQuoteInquirySchema,
   PreviewModeSchema,
   QuickEstimateInquirySchema,
   ServiceIdSchema,
   type Answers,
   type ConfiguratorState,
   type ContactInquiry,
+  type CustomQuoteInquiry,
   type QuickEstimateInquiry,
   type ServiceId,
   type StepId,
@@ -34,6 +36,10 @@ export function validateQuickEstimateInquiry(input: unknown): ValidationResult<Q
 
 export function validateContactInquiry(input: unknown): ValidationResult<ContactInquiry> {
   return formatZodResult(ContactInquirySchema.safeParse(input));
+}
+
+export function validateCustomQuoteInquiry(input: unknown): ValidationResult<CustomQuoteInquiry> {
+  return formatZodResult(CustomQuoteInquirySchema.safeParse(input));
 }
 
 const ANSWER_KEYS = Object.keys(AnswersSchema.shape) as StepId[];

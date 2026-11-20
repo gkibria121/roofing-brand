@@ -24,8 +24,8 @@ export default function EstimatePage() {
     <>
       <PageHeader
         eyebrow="Interactive 3D Exterior Estimator"
-        title="Design your roof & fence in 3D"
-        intro="Select roofing, fencing, or both — follow the guided steps or switch to Decorate in 3D to customize styles, finishes, solar panels, and gates live around your house."
+        title="Get your 3D roof & fence estimate"
+        intro="Enter your ZIP code, pick your address, customize your roof or fence live in 3D, and receive an itemized custom quote."
         crumbs={[{ name: "3D Estimate" }]}
       />
 

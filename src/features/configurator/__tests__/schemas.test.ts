@@ -20,6 +20,7 @@ describe("validateCatalogIntegrity", () => {
     geometry: "wood-privacy",
     defaultFinishId: "cedar",
     defaultHeight: "6ft",
+    pricePerLinearFt: 28.5,
     finishes: [{ id: "cedar", label: "Cedar", color: "#9c6b43" }],
     packages: [
       {
@@ -76,6 +77,7 @@ describe("validateCatalogIntegrity", () => {
       supportsPitched: true,
       offeredAsNew: true,
       baseColor: "#3b4047",
+      pricePerSqFt: 5.25,
       pbr: { tile: 2, roughness: 1.5, metalness: 0.1, bump: 0.05 },
       packages: [],
     };

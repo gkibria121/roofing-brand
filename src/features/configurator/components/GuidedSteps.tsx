@@ -22,6 +22,7 @@ type Props = {
   onBack: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onBackToPackages: () => void;
+  finishLabel?: string;
 };
 
 export function GuidedSteps({
@@ -39,6 +40,7 @@ export function GuidedSteps({
   onBack,
   onSubmit,
   onBackToPackages,
+  finishLabel = "Continue to custom quote",
 }: Props) {
   const uid = useId();
   const step = steps[stepIndex];
@@ -50,7 +52,7 @@ export function GuidedSteps({
   const nextLabel =
     stepIndex < steps.length - 1
       ? `Next: ${steps[stepIndex + 1].summaryLabel}`
-      : "Show matching packages";
+      : finishLabel;
 
   const fenceStyle = getFenceStyle(answers.fenceStyle);
   const fenceFinish = getFenceFinish(fenceStyle.id, answers.fenceFinish);

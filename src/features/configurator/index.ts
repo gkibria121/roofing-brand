@@ -13,16 +13,36 @@ export {
   toggleServiceSelection,
 } from "./domain/engine";
 export {
+  createCustomPropertyAddress,
+  lookupAddressesByZip,
+  setAddressLookupProvider,
+  type AddressLookupProvider,
+  type ZipLookupResult,
+} from "./domain/addressLookup";
+export {
+  buildConfigurationsFromSession,
+  calculateLineTotal,
+  calculateQuoteTotal,
+  formatCurrency,
+  removeConfiguration,
+  updateConfigurationQuantity,
+  updateConfigurationTier,
+  type SavedConfiguration,
+} from "./domain/quote";
+export {
   parseConfiguratorState,
   serializeConfiguratorState,
   validateContactInquiry,
+  validateCustomQuoteInquiry,
   validateQuickEstimateInquiry,
 } from "./domain/validation";
 export type {
   Answers,
+  AttachmentMeta,
   BuildingType,
   ConfiguratorState,
   ContactInquiry,
+  CustomQuoteInquiry,
   FenceFinish,
   FenceHeight,
   FencePlacement,
@@ -30,6 +50,7 @@ export type {
   Material,
   PackageTier,
   PreviewMode,
+  PropertyAddress,
   QuickEstimateInquiry,
   RoofAge,
   RoofMaterialDef,

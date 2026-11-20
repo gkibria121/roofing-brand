@@ -71,6 +71,7 @@ export const RoofMaterialDefSchema = z.object({
   supportsPitched: z.boolean(),
   offeredAsNew: z.boolean(),
   baseColor: HexColorSchema,
+  pricePerSqFt: z.number().positive(),
   pbr: z.object({
     tile: z.number().positive(),
     roughness: z.number().min(0).max(1),
@@ -98,6 +99,7 @@ export const FenceStyleDefSchema = z
     defaultFinishId: z.string().min(1),
     finishes: z.array(FenceFinishSchema).min(1),
     defaultHeight: FenceHeightSchema,
+    pricePerLinearFt: z.number().positive(),
     packages: z.array(PackageTierSchema).min(1),
   })
   .refine((style) => style.finishes.some((f) => f.id === style.defaultFinishId), {
@@ -105,6 +107,28 @@ export const FenceStyleDefSchema = z
     path: ["defaultFinishId"],
   });
 export type FenceStyleDef = z.infer<typeof FenceStyleDefSchema>;
+
+export const ZipCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{5}$/, "Please enter a valid 5-digit US ZIP code.");
+
+export const PropertyAddressSchema = z.object({
+  id: z.string().min(1),
+  street: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(2).max(2),
+  zip: ZipCodeSchema,
+  country: z.string().min(1),
+  fullAddress: z.string().min(1),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  suggestedBuildingType: BuildingTypeSchema,
+  suggestedStories: StoriesSchema,
+  lotLabel: z.string().min(1),
+  nearbyStreets: z.tuple([z.string(), z.string(), z.string(), z.string()]),
+});
+export type PropertyAddress = z.infer<typeof PropertyAddressSchema>;
 
 export const AnswersSchema = z.object({
   // Shared property
@@ -174,6 +198,37 @@ export const ContactInquirySchema = QuickEstimateInquirySchema.extend({
   ),
 });
 export type ContactInquiry = z.infer<typeof ContactInquirySchema>;
+
+export const MAX_ATTACHMENTS = 5;
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
+
+export const AttachmentMetaSchema = z.object({
+  name: z.string().min(1),
+  size: z.number().nonnegative().max(MAX_ATTACHMENT_BYTES, "Each file must be 10 MB or smaller."),
+  type: z.string(),
+});
+export type AttachmentMeta = z.infer<typeof AttachmentMetaSchema>;
+
+export const CustomQuoteInquirySchema = QuickEstimateInquirySchema.extend({
+  service: z.preprocess(coerceNullishToEmpty, z.string().trim().min(1, "Please select a service.")),
+  address: z.preprocess(
+    coerceNullishToEmpty,
+    z.string().trim().min(5, "Please enter your property address.").max(240, "Address is too long."),
+  ),
+  notes: z.preprocess(
+    coerceNullishToEmpty,
+    z.string().trim().max(2000, "Notes must be 2,000 characters or fewer."),
+  ),
+  acceptedTerms: z.literal(true, {
+    error: "Please agree to the Terms of Use to request a quote.",
+  }),
+  marketingOptIn: z.boolean(),
+  attachments: z
+    .array(AttachmentMetaSchema)
+    .max(MAX_ATTACHMENTS, `You can attach up to ${MAX_ATTACHMENTS} files.`)
+    .default([]),
+});
+export type CustomQuoteInquiry = z.infer<typeof CustomQuoteInquirySchema>;
 
 /** Validates a catalog array at runtime (used in automated tests & dev assertions). */
 export function validateCatalogIntegrity<T extends { id: string }>(
