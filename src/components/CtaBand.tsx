@@ -10,7 +10,7 @@ export function CtaBand() {
           <p className="mt-2 text-brand-100">Get a free, no-obligation written estimate from {site.shortName}.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/contact" className="btn btn-primary btn-lg">Get a free estimate</Link>
+          <Link href="/estimate" className="btn btn-primary btn-lg">Start 3D Estimate</Link>
           <a href={`tel:${site.phoneHref}`} className="btn btn-lg border-2 border-white/70 text-white hover:bg-white/10">
             Call {site.phone}
           </a>

@@ -42,7 +42,7 @@ export function Header() {
                   <Link
                     href={l.href}
                     aria-current={current ? "page" : undefined}
-                    className="rounded-md px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-brand-900 aria-[current=page]:text-brand-900 aria-[current=page]:underline aria-[current=page]:decoration-accent-600 aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+                    className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-brand-900 aria-[current=page]:text-brand-900 aria-[current=page]:underline aria-[current=page]:decoration-accent-600 aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
                   >
                     {l.label}
                   </Link>
@@ -53,10 +53,10 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <a href={`tel:${site.phoneHref}`} className="text-sm font-bold text-brand-900 hover:text-accent-700">
+          <a href={`tel:${site.phoneHref}`} className="hidden whitespace-nowrap text-sm font-bold text-brand-900 hover:text-accent-700 lg:inline">
             {site.phone}
           </a>
-          <Link href="/contact" className="btn btn-primary">Free Estimate</Link>
+          <Link href="/estimate" className="btn btn-primary whitespace-nowrap">Free 3D Estimate</Link>
         </div>
 
         <button
@@ -93,7 +93,7 @@ export function Header() {
             })}
             <li className="mt-2 grid grid-cols-2 gap-3 pb-2">
               <a href={`tel:${site.phoneHref}`} className="btn btn-secondary">Call now</a>
-              <Link href="/contact" className="btn btn-primary">Free Estimate</Link>
+              <Link href="/estimate" className="btn btn-primary">3D Estimate</Link>
             </li>
           </ul>
         </nav>

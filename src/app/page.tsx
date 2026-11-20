@@ -41,7 +41,7 @@ export default function HomePage() {
               stand behind. Serving {site.serviceAreas.slice(0, 2).join(", ")} and surrounding areas.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/contact" className="btn btn-primary btn-lg">Get a free estimate</Link>
+              <Link href="/estimate" className="btn btn-primary btn-lg">Build Your 3D Estimate</Link>
               <a href={`tel:${site.phoneHref}`} className="btn btn-secondary btn-lg">Call {site.phone}</a>
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-600">

@@ -113,6 +113,48 @@ select::picker-icon {
   @media (min-width: 1024px) {
     .container-x { padding-inline: 2rem; }
   }
+
+  .roof-canvas-stage {
+    content-visibility: auto;
+    contain-intrinsic-size: auto none auto 420px;
+  }
+
+  .field-control {
+    font: inherit;
+    font-size: max(1rem, 1em);
+    min-height: 48px;
+  }
+
+  .field-control:is(:user-invalid, [aria-invalid="true"]) {
+    border-color: #b91c1c;
+    background-color: #fef2f2;
+  }
+
+  .field-control:user-valid {
+    border-color: #15803d;
+  }
+
+  .wizard-progress {
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+    appearance: none;
+    background: #e2e8f0;
+  }
+  .wizard-progress::-webkit-progress-bar {
+    background: #e2e8f0;
+    border-radius: 9999px;
+  }
+  .wizard-progress::-webkit-progress-value {
+    background: var(--color-accent-600);
+    border-radius: 9999px;
+    transition: width 0.25s ease;
+  }
+  .wizard-progress::-moz-progress-bar {
+    background: var(--color-accent-600);
+    border-radius: 9999px;
+  }
 }
 
 @media (forced-colors: active) {
