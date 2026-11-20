@@ -1,8 +1,7 @@
 # Website & 3D Estimator — Business Information Questionnaire
 
 > **Purpose:** Our website prototype is ready. To turn it into your real, launch-ready website and 3D quote estimator, please fill in the sections below with your real business details, pricing rules, and preferences.
->
-> **How to fill this out:** You don’t need any technical knowledge—just type your answers directly under each question or inside the tables. If something doesn’t apply to your business (or you’d like to add a new option), just note that!
+> 
 
 ---
 
