@@ -1,11 +1,18 @@
 /**
- * Roofing 3D configurator questionnaire — only questions that directly
- * change the 3D building & roof model.
- *
- * Flow: slope → stories → building type → current material (branches on slope) →
- * roof age (weathering) → leaks/damage (damage decals) →
- * desired roof type (branches on slope) → solar (panels) → matching packages.
+ * Multi-service 3D configurator questions (Roofing + Fencing).
+ * Every question directly updates the 3D building, roof, or yard fence model.
  */
+
+import {
+  FENCE_CATALOG,
+  fenceHeightOptions,
+  fencePlacementOptions,
+  getFenceStyle,
+  type FenceHeight,
+  type FencePlacement,
+} from "./fences";
+
+export type ServiceId = "roofing" | "fencing";
 
 export type Slope = "flat" | "low" | "moderate" | "steep";
 export type Stories = "single" | "multiple";
@@ -17,6 +24,7 @@ export type RoofAge = "0-10" | "10+" | "unsure";
 export type YesNo = "yes" | "no";
 
 export type Answers = {
+  // Roofing & building
   slope: Slope;
   stories: Stories;
   buildingType: BuildingType;
@@ -25,6 +33,12 @@ export type Answers = {
   damage: YesNo;
   desiredType: Material;
   solar: YesNo;
+  // Fencing
+  fenceStyle: string;
+  fenceFinish: string;
+  fenceHeight: FenceHeight;
+  fencePlacement: FencePlacement;
+  fenceGate: YesNo;
 };
 
 export type StepId = keyof Answers;
@@ -33,11 +47,14 @@ export type Option = {
   value: string;
   label: string;
   description?: string;
+  /** Optional swatch hex color for visual finish chips. */
+  swatch?: string;
+  swatchSecondary?: string;
 };
 
 export type StepDef = {
   id: StepId;
-  /** Short name used in the summary list. */
+  category: "roofing" | "fencing" | "property";
   summaryLabel: string;
   title: string;
   hint?: string;
@@ -76,25 +93,25 @@ const mat = (...values: Material[]): Option[] =>
 
 export const isFlat = (slope?: Slope) => slope === "flat";
 
-/** Current roof material — branches on slope (Step 1). */
 export function currentMaterialOptions(a: Partial<Answers>): Option[] {
   return isFlat(a.slope) ? mat("tpo", "epdm", "modbit") : mat("asphalt", "metal", "tile", "cedar");
 }
 
-/** Desired roof type — branches on slope (Step 1). */
 export function desiredMaterialOptions(a: Partial<Answers>): Option[] {
   return isFlat(a.slope) ? mat("tpo", "modbit") : mat("asphalt", "metal");
 }
 
-export const steps: StepDef[] = [
-  {
+export const allSteps: Record<StepId, StepDef> = {
+  slope: {
     id: "slope",
+    category: "roofing",
     summaryLabel: "Roof slope",
     title: "What is the slope of your roof?",
     options: () => slopeOptions,
   },
-  {
+  stories: {
     id: "stories",
+    category: "property",
     summaryLabel: "Stories",
     title: "Does your building have multiple stories?",
     options: () => [
@@ -102,8 +119,9 @@ export const steps: StepDef[] = [
       { value: "multiple", label: "Multiple stories" },
     ],
   },
-  {
+  buildingType: {
     id: "buildingType",
+    category: "property",
     summaryLabel: "Building type",
     title: "What type of building do you have?",
     options: () => [
@@ -111,14 +129,16 @@ export const steps: StepDef[] = [
       { value: "commercial", label: "Commercial", description: "Office, retail, warehouse or multi-family" },
     ],
   },
-  {
+  currentMaterial: {
     id: "currentMaterial",
+    category: "roofing",
     summaryLabel: "Current roof",
     title: "What is currently on your roof?",
     options: currentMaterialOptions,
   },
-  {
+  roofAge: {
     id: "roofAge",
+    category: "roofing",
     summaryLabel: "Roof age",
     title: "How old is your main roof?",
     hint: "If there are multiple buildings, what is the age of the largest roof?",
@@ -128,8 +148,9 @@ export const steps: StepDef[] = [
       { value: "unsure", label: "Not sure", description: "I am unsure about the age of my roof" },
     ],
   },
-  {
+  damage: {
     id: "damage",
+    category: "roofing",
     summaryLabel: "Leaks or damage",
     title: "Does your roof have leaks or damage?",
     options: () => [
@@ -137,15 +158,17 @@ export const steps: StepDef[] = [
       { value: "no", label: "No" },
     ],
   },
-  {
+  desiredType: {
     id: "desiredType",
+    category: "roofing",
     summaryLabel: "New roof",
     title: "What type of roof would you like?",
     hint: "Your 3D preview will switch to the new roof once you choose.",
     options: desiredMaterialOptions,
   },
-  {
+  solar: {
     id: "solar",
+    category: "roofing",
     summaryLabel: "Solar",
     title: "Are you interested in installing solar panels on your roof?",
     options: () => [
@@ -153,9 +176,78 @@ export const steps: StepDef[] = [
       { value: "no", label: "No" },
     ],
   },
-];
+  fenceStyle: {
+    id: "fenceStyle",
+    category: "fencing",
+    summaryLabel: "Fence style",
+    title: "Which fence style fits your property?",
+    hint: "Watch the 3D fence wrap around your yard as you preview each style.",
+    options: () =>
+      FENCE_CATALOG.map((f) => ({
+        value: f.id,
+        label: f.label,
+        description: f.shortDescription,
+      })),
+  },
+  fenceFinish: {
+    id: "fenceFinish",
+    category: "fencing",
+    summaryLabel: "Fence finish",
+    title: "Choose your fence color & finish",
+    options: (a) => {
+      const style = getFenceStyle(a.fenceStyle);
+      return style.finishes.map((fin) => ({
+        value: fin.id,
+        label: fin.label,
+        swatch: fin.color,
+        swatchSecondary: fin.postColor,
+      }));
+    },
+  },
+  fenceHeight: {
+    id: "fenceHeight",
+    category: "fencing",
+    summaryLabel: "Fence height",
+    title: "How tall should your fence be?",
+    options: () => fenceHeightOptions,
+  },
+  fencePlacement: {
+    id: "fencePlacement",
+    category: "fencing",
+    summaryLabel: "Fence coverage",
+    title: "Where around the house should the fence go?",
+    options: () => fencePlacementOptions,
+  },
+  fenceGate: {
+    id: "fenceGate",
+    category: "fencing",
+    summaryLabel: "Entry gate",
+    title: "Add matching entry & driveway gates?",
+    hint: "Includes a walk gate for paths and a double-swing gate across the driveway when enclosed.",
+    options: () => [
+      { value: "yes", label: "Yes, include matching gates", description: "Framed gates with matte-black latches" },
+      { value: "no", label: "No gates (open entry)", description: "Leave walkway and driveway openings clear" },
+    ],
+  },
+};
 
-/** Human label for a stored answer value. */
+export function getStepsForServices(services: ServiceId[]): StepDef[] {
+  const hasRoof = services.includes("roofing");
+  const hasFence = services.includes("fencing");
+  const ids: StepId[] = [];
+
+  if (hasRoof) {
+    ids.push("slope", "stories", "buildingType", "currentMaterial", "roofAge", "damage", "desiredType", "solar");
+  } else if (hasFence) {
+    ids.push("buildingType", "stories");
+  }
+
+  if (hasFence) {
+    ids.push("fenceStyle", "fenceFinish", "fenceHeight", "fencePlacement", "fenceGate");
+  }
+  return ids.map((id) => allSteps[id]);
+}
+
 export function labelFor(step: StepDef, answers: Partial<Answers>): string {
   const v = answers[step.id];
   if (v === undefined) return "—";
@@ -163,8 +255,8 @@ export function labelFor(step: StepDef, answers: Partial<Answers>): string {
 }
 
 /**
- * Apply an answer and drop any dependent answers that are no longer valid
- * (e.g. changing slope from Moderate to Flat invalidates "Asphalt").
+ * Apply an answer and keep dependent answers synchronized
+ * (slope -> roof materials; fenceStyle -> valid fenceFinish).
  */
 export function applyAnswer<K extends StepId>(prev: Partial<Answers>, id: K, value: Answers[K]): Partial<Answers> {
   const next: Partial<Answers> = { ...prev, [id]: value };
@@ -172,6 +264,12 @@ export function applyAnswer<K extends StepId>(prev: Partial<Answers>, id: K, val
     const valid = (opts: Option[], v?: string) => opts.some((o) => o.value === v);
     if (!valid(currentMaterialOptions(next), next.currentMaterial)) delete next.currentMaterial;
     if (!valid(desiredMaterialOptions(next), next.desiredType)) delete next.desiredType;
+  }
+  if (id === "fenceStyle") {
+    const style = getFenceStyle(String(value));
+    const finishValid = style.finishes.some((f) => f.id === next.fenceFinish);
+    if (!finishValid) next.fenceFinish = style.defaultFinishId;
+    if (!next.fenceHeight) next.fenceHeight = style.defaultHeight;
   }
   return next;
 }

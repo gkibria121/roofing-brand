@@ -646,3 +646,98 @@ export function createDecalTexture(kind: DecalKind, anisotropy: number): Texture
   t.anisotropy = anisotropy;
   return t;
 }
+
+/** Neutral-toned vertical wood plank texture meant to be tinted by any FenceFinish color. */
+export function createFenceWoodTexture(anisotropy: number): PBRTextures {
+  const S = 512;
+  const color = makeCanvas(S);
+  const bump = makeCanvas(S);
+  const c = color.getContext("2d")!;
+  const b = bump.getContext("2d")!;
+  const rnd = mulberry32(613);
+
+  const boards = 8;
+  const bw = S / boards;
+  b.fillStyle = "#b0b0b0";
+  b.fillRect(0, 0, S, S);
+
+  for (let i = 0; i < boards; i++) {
+    const x = i * bw;
+    const tone = 218 + Math.floor(rnd() * 34);
+    c.fillStyle = `rgb(${tone},${tone - 4},${tone - 9})`;
+    c.fillRect(x, 0, bw, S);
+
+    // Subtle woodgrain lines running vertically along each picket/slat
+    for (let k = 0; k < 22; k++) {
+      const gx = x + 3 + rnd() * (bw - 6);
+      c.fillStyle = rnd() > 0.4 ? `rgba(55,35,20,${0.05 + rnd() * 0.08})` : `rgba(255,250,240,${0.04 + rnd() * 0.06})`;
+      c.fillRect(gx, 0, 1 + rnd() * 1.4, S);
+      b.fillStyle = `rgba(90,90,90,${0.08 + rnd() * 0.1})`;
+      b.fillRect(gx, 0, 1.2, S);
+    }
+
+    // Crisp dark shadow gap between individual privacy boards
+    c.fillStyle = "rgba(18,12,8,0.52)";
+    c.fillRect(x, 0, 3, S);
+    b.fillStyle = "#222222";
+    b.fillRect(x, 0, 3.5, S);
+  }
+  speckle(c, rnd, S, S, 0.04, 5000, 1.4);
+  return wrapPBR(color, bump, anisotropy);
+}
+
+/** Clean tongue-and-groove vinyl panel texture meant to be tinted by any vinyl FenceFinish color. */
+export function createFenceVinylTexture(anisotropy: number): PBRTextures {
+  const S = 512;
+  const color = makeCanvas(S);
+  const bump = makeCanvas(S);
+  const c = color.getContext("2d")!;
+  const b = bump.getContext("2d")!;
+
+  c.fillStyle = "#f4f5f6";
+  c.fillRect(0, 0, S, S);
+  b.fillStyle = "#c8c8c8";
+  b.fillRect(0, 0, S, S);
+
+  const panels = 6;
+  const pw = S / panels;
+  for (let i = 0; i < panels; i++) {
+    const x = i * pw;
+    c.fillStyle = "rgba(30,38,48,0.16)";
+    c.fillRect(x, 0, 2.5, S);
+    c.fillStyle = "rgba(255,255,255,0.65)";
+    c.fillRect(x + 2.5, 0, 2.5, S);
+    b.fillStyle = "#404040";
+    b.fillRect(x, 0, 3, S);
+  }
+  return wrapPBR(color, bump, anisotropy);
+}
+
+/** Translucent diamond-woven steel chain-link mesh texture (tinted by finish color). */
+export function createChainLinkTexture(anisotropy: number): Texture {
+  const S = 256;
+  const cv = makeCanvas(S);
+  const c = cv.getContext("2d")!;
+  c.clearRect(0, 0, S, S);
+
+  const step = 32;
+  c.lineWidth = 4.2;
+  c.strokeStyle = "#ffffff";
+  for (let x = -S; x <= S * 2; x += step) {
+    c.beginPath();
+    c.moveTo(x, 0);
+    c.lineTo(x + S, S);
+    c.stroke();
+
+    c.beginPath();
+    c.moveTo(x, 0);
+    c.lineTo(x - S, S);
+    c.stroke();
+  }
+  const t = new CanvasTexture(cv);
+  t.colorSpace = SRGBColorSpace;
+  t.wrapS = t.wrapT = RepeatWrapping;
+  t.anisotropy = anisotropy;
+  t.needsUpdate = true;
+  return t;
+}

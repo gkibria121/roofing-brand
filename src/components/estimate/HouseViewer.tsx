@@ -32,7 +32,13 @@ export default function HouseViewer({ config, badges, caption }: Props) {
   const [rotating, setRotating] = useState(false);
   const [description, setDescription] = useState("Interactive 3D architectural model of your building.");
 
-  const { slope, stories, buildingType, material, weathering, damaged, solar } = config;
+  const { slope, stories, buildingType, material, weathering, damaged, solar, fence } = config;
+  const fEnabled = fence?.enabled ?? false;
+  const fStyle = fence?.styleId ?? "";
+  const fFinish = fence?.finishId ?? "";
+  const fHeight = fence?.height ?? "6ft";
+  const fPlacement = fence?.placement ?? "backyard";
+  const fGate = fence?.gate ?? true;
   const initialConfigRef = useRef<SceneConfig>(config);
 
   // Create the WebGL scene once (three.js is code-split into this chunk).
@@ -59,14 +65,32 @@ export default function HouseViewer({ config, badges, caption }: Props) {
     };
   }, []);
 
-  // Rebuild the model whenever any configuration field changes.
+  // Rebuild the model whenever any building, roof or fence configuration field changes.
   useEffect(() => {
-    const next: SceneConfig = { slope, stories, buildingType, material, weathering, damaged, solar };
+    const next: SceneConfig = {
+      slope,
+      stories,
+      buildingType,
+      material,
+      weathering,
+      damaged,
+      solar,
+      fence: fEnabled
+        ? {
+            enabled: true,
+            styleId: fStyle,
+            finishId: fFinish,
+            height: fHeight,
+            placement: fPlacement,
+            gate: fGate,
+          }
+        : undefined,
+    };
     initialConfigRef.current = next;
     const scene = sceneRef.current;
     if (!scene) return;
     setDescription(scene.setConfig(next).description);
-  }, [slope, stories, buildingType, material, weathering, damaged, solar]);
+  }, [slope, stories, buildingType, material, weathering, damaged, solar, fEnabled, fStyle, fFinish, fHeight, fPlacement, fGate]);
 
   function onKeyDown(e: React.KeyboardEvent) {
     const s = sceneRef.current;

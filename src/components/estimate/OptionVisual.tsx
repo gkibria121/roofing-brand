@@ -1,4 +1,4 @@
-import type { StepId } from "@/lib/estimate/questions";
+import type { Option, StepId } from "@/lib/estimate/questions";
 
 const swatchStyle: Record<string, { bg: string; pattern?: string }> = {
   asphalt: { bg: "#444a52", pattern: "repeating-linear-gradient(180deg, rgba(0,0,0,0.28) 0 2px, transparent 2px 9px)" },
@@ -10,7 +10,7 @@ const swatchStyle: Record<string, { bg: string; pattern?: string }> = {
   modbit: { bg: "#5d6064", pattern: "radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px)" },
 };
 
-export function OptionVisual({ stepId, value }: { stepId: StepId; value: string }) {
+export function OptionVisual({ stepId, value, option }: { stepId: StepId; value: string; option?: Option }) {
   if (stepId === "currentMaterial" || stepId === "desiredType") {
     const sw = swatchStyle[value];
     if (!sw) return null;
@@ -24,6 +24,80 @@ export function OptionVisual({ stepId, value }: { stepId: StepId; value: string 
           backgroundSize: value === "modbit" ? "6px 6px" : undefined,
         }}
       />
+    );
+  }
+
+  if (stepId === "fenceFinish" && option?.swatch) {
+    return (
+      <span
+        aria-hidden="true"
+        className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-slate-300 shadow-inner"
+        style={{ backgroundColor: option.swatch }}
+      >
+        {option.swatchSecondary && (
+          <span
+            className="absolute inset-y-0 right-0 w-3 border-l border-white/40"
+            style={{ backgroundColor: option.swatchSecondary }}
+          />
+        )}
+      </span>
+    );
+  }
+
+  if (stepId === "fenceStyle") {
+    const paths: Record<string, string> = {
+      "wood-privacy": "M4 6v14M8 6v14M12 6v14M16 6v14M20 6v14M3 6h18M3 19h18",
+      "vinyl-privacy": "M4 5h16v15H4zM9.3 5v15M14.7 5v15M3 5h18",
+      "ornamental-iron": "M4 5v15M8 6v14M12 6v14M16 6v14M20 5v15M4 8h16M4 11h16M4 18h16",
+      picket: "M5 8l1.5-2.5L8 8v12H5zM10.5 8l1.5-2.5L13.5 8v12h-3zM16 8l1.5-2.5L19 8v12h-3zM3 12h18M3 17h18",
+      "horizontal-slat": "M4 5v15M20 5v15M4 7h16M4 10.5h16M4 14h16M4 17.5h16",
+      "chain-link": "M4 5v15M20 5v15M4 6h16M4 6l14 14M10 6l10 10M4 12l8 8M20 6L6 20M14 6L4 16M20 12l-8 8",
+    };
+    return (
+      <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-900">
+        <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d={paths[value] ?? paths["wood-privacy"]} />
+        </svg>
+      </span>
+    );
+  }
+
+  if (stepId === "fencePlacement") {
+    return (
+      <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-900">
+        <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="8.5" y="9" width="7" height="6" rx="1" fill="currentColor" fillOpacity="0.16" />
+          {value === "backyard" && <path d="M8.5 12H4V4h16v8h-4.5" />}
+          {value === "full-perimeter" && <path d="M4 4h16v16h-5M11 20H4V4" />}
+          {value === "front-yard" && <path d="M4 12v8h6M14 20h6v-8" />}
+        </svg>
+      </span>
+    );
+  }
+
+  if (stepId === "fenceHeight") {
+    const barH = value === "4ft" ? 8 : value === "6ft" ? 12 : 16;
+    return (
+      <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-900">
+        <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M4 20h16" />
+          <rect x="7" y={20 - barH} width="10" height={barH} rx="1.5" fill="currentColor" fillOpacity="0.18" />
+        </svg>
+      </span>
+    );
+  }
+
+  if (stepId === "fenceGate") {
+    return (
+      <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-900">
+        <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {value === "yes" ? (
+            <path d="M4 6v14M20 6v14M4 8h7v10H4M13 8h7v10h-7M11 13h2" />
+          ) : (
+            <path d="M4 6v14M20 6v14M4 8h4M16 8h4M4 18h4M16 18h4" />
+          )}
+        </svg>
+      </span>
     );
   }
 

@@ -93,7 +93,7 @@ export default function HomePage() {
             <h2 id="services-heading" className="mt-3 text-3xl font-extrabold sm:text-4xl">Roofing services for every need</h2>
             <p className="mt-4 text-slate-600">From a small repair to a full replacement, one expert team handles it all.</p>
           </div>
-          <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
               <li key={s.slug}>
                 <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-lg">

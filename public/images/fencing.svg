@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Illustration of a residential home with a custom wood privacy fence">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dbeafe"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+    <linearGradient id="cedar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b07c4f"/><stop offset="1" stop-color="#8b5a34"/></linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="1000" cy="160" r="64" fill="#fde68a"/>
+  <!-- House silhouette behind fence -->
+  <polygon points="180,450 560,210 940,450" fill="#334155"/>
+  <rect x="240" y="450" width="640" height="260" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
+  <rect x="330" y="490" width="120" height="110" fill="#bfdbfe" stroke="#ffffff" stroke-width="8"/>
+  <rect x="670" y="490" width="120" height="110" fill="#bfdbfe" stroke="#ffffff" stroke-width="8"/>
+  <!-- Lawn -->
+  <rect y="680" width="1200" height="220" fill="#86a868"/>
+  <!-- Custom Wood Privacy Fence -->
+  <rect x="40" y="510" width="1120" height="250" fill="url(#cedar)"/>
+  <g stroke="#5c391f" stroke-width="4" opacity="0.55">
+    <path d="M100 510v250M160 510v250M220 510v250M280 510v250M340 510v250M400 510v250M460 510v250M520 510v250M580 510v250M640 510v250M700 510v250M760 510v250M820 510v250M880 510v250M940 510v250M1000 510v250M1060 510v250M1120 510v250"/>
+  </g>
+  <!-- Top & bottom rails -->
+  <rect x="36" y="502" width="1128" height="18" fill="#7c4f2c"/>
+  <rect x="36" y="746" width="1128" height="18" fill="#6b4223"/>
+  <!-- Capped 4x4 fence posts -->
+  <g fill="#6b4223">
+    <rect x="36" y="486" width="32" height="284" rx="3"/><polygon points="30,486 52,468 74,486"/>
+    <rect x="396" y="486" width="32" height="284" rx="3"/><polygon points="390,486 412,468 434,486"/>
+    <rect x="756" y="486" width="32" height="284" rx="3"/><polygon points="750,486 772,468 794,486"/>
+    <rect x="1132" y="486" width="32" height="284" rx="3"/><polygon points="1126,486 1148,468 1170,486"/>
+  </g>
+</svg>

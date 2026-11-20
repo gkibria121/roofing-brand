@@ -64,6 +64,20 @@ export const services: Service[] = [
       "50+ year lifespan",
     ],
   },
+  {
+    slug: "fence-installation",
+    title: "Custom Fencing",
+    short: "Privacy, vinyl, ornamental iron, horizontal slat & commercial fencing.",
+    description:
+      "Boost privacy, security, and curb appeal with custom-built fencing installed with concrete-set posts and matching walk or driveway gates. Preview styles, colors, heights, and layouts around your property in our 3D estimator.",
+    image: "/images/fencing.svg",
+    features: [
+      "Wood privacy, vinyl & horizontal modern slats",
+      "Ornamental aluminum/iron, picket & chain link",
+      "Custom walk gates & double driveway gates",
+      "Concrete-set posts built for lasting alignment",
+    ],
+  },
 ];
 
 export const faqs = [

@@ -21,8 +21,12 @@ import {
   type MeshStandardMaterialParameters,
 } from "three";
 import type { BuildingType, Material, Slope, Stories } from "@/lib/estimate/questions";
+import { buildFence, type FenceAssetProvider, type FenceSceneConfig } from "./fence";
 import {
+  createChainLinkTexture,
   createDecalTexture,
+  createFenceVinylTexture,
+  createFenceWoodTexture,
   createRoofTextures,
   createSolarTexture,
   createSurfaceTextures,
@@ -43,17 +47,21 @@ export type SceneConfig = {
   weathering: number;
   damaged: boolean;
   solar: boolean;
+  fence?: FenceSceneConfig;
 };
 
 const PITCH_DEG: Record<Exclude<Slope, "flat">, number> = { low: 18, moderate: 30, steep: 45 };
 
 /** Caches textures and materials so rebuilding the model never leaks GPU resources. */
-export class AssetLibrary {
+export class AssetLibrary implements FenceAssetProvider {
   private roofTex = new Map<Material, PBRTextures>();
   private surfaceTex = new Map<ArchitecturalSurface, PBRTextures>();
   private decalTex = new Map<DecalKind, Texture>();
   private mats = new Map<string, MeshStandardMaterial>();
   private extra: Texture[] = [];
+  private fenceWoodTex?: PBRTextures;
+  private fenceVinylTex?: PBRTextures;
+  private chainLinkTex?: Texture;
 
   constructor(private anisotropy: number) {}
 
@@ -170,6 +178,53 @@ export class AssetLibrary {
     return m;
   }
 
+  fenceWood(colorHex: string): MeshStandardMaterial {
+    if (!this.fenceWoodTex) {
+      this.fenceWoodTex = createFenceWoodTexture(this.anisotropy);
+      this.extra.push(this.fenceWoodTex.map, this.fenceWoodTex.bumpMap);
+    }
+    return this.std(`fence:wood:${colorHex}`, {
+      map: this.fenceWoodTex.map,
+      bumpMap: this.fenceWoodTex.bumpMap,
+      bumpScale: 0.025,
+      color: colorHex,
+      roughness: 0.86,
+      metalness: 0.0,
+    });
+  }
+
+  fenceVinyl(colorHex: string): MeshStandardMaterial {
+    if (!this.fenceVinylTex) {
+      this.fenceVinylTex = createFenceVinylTexture(this.anisotropy);
+      this.extra.push(this.fenceVinylTex.map, this.fenceVinylTex.bumpMap);
+    }
+    return this.std(`fence:vinyl:${colorHex}`, {
+      map: this.fenceVinylTex.map,
+      bumpMap: this.fenceVinylTex.bumpMap,
+      bumpScale: 0.015,
+      color: colorHex,
+      roughness: 0.44,
+      metalness: 0.02,
+      envMapIntensity: 0.85,
+    });
+  }
+
+  fenceChainLink(colorHex: string): MeshStandardMaterial {
+    if (!this.chainLinkTex) {
+      this.chainLinkTex = createChainLinkTexture(this.anisotropy);
+      this.extra.push(this.chainLinkTex);
+    }
+    return this.std(`fence:chain:${colorHex}`, {
+      map: this.chainLinkTex,
+      color: colorHex,
+      transparent: true,
+      alphaTest: 0.35,
+      side: DoubleSide,
+      roughness: 0.36,
+      metalness: 0.72,
+    });
+  }
+
   dispose() {
     for (const t of this.roofTex.values()) {
       t.map.dispose();
@@ -187,6 +242,9 @@ export class AssetLibrary {
     this.decalTex.clear();
     this.mats.clear();
     this.extra = [];
+    this.fenceWoodTex = undefined;
+    this.fenceVinylTex = undefined;
+    this.chainLinkTex = undefined;
   }
 }
 
@@ -1279,16 +1337,14 @@ export function buildHouse(cfg: SceneConfig, lib: AssetLibrary): House {
       }
     }
 
-    // Organic landscaping around the residential lot (kept clear of hero front-right sightline)
+    // Keep both side yards 100% clear of trees so all fence lines stay unobstructed;
+    // place subtle accent trees far behind the rear fence for natural horizon depth.
     addLandscaping(
       bldg,
       lib,
       [
-        [-9.4, -5.2, 1.35],
-        [-10.6, 3.4, 1.05],
-        [13.4, -4.8, 1.4],
-        [14.2, -0.4, 1.1],
-        [1.8, -8.8, 1.25],
+        [-4.2, -13.8, 1.25],
+        [7.6, -14.2, 1.3],
       ],
       [
         [-4.8, D / 2 + 0.72, 1.0],
@@ -1647,14 +1703,13 @@ export function buildHouse(cfg: SceneConfig, lib: AssetLibrary): House {
       }
     }
 
+    // Keep commercial side yards clear of trees so perimeter fencing stays completely unobstructed.
     addLandscaping(
       root,
       lib,
       [
-        [-13.5, -5.5, 1.45],
-        [13.8, -4.8, 1.5],
-        [-14.2, 6.2, 1.2],
-        [14.2, 6.4, 1.25],
+        [-6.5, -16.5, 1.4],
+        [7.0, -16.8, 1.45],
       ],
       [
         [-10.4, 4.5, 1.1],
@@ -1667,11 +1722,19 @@ export function buildHouse(cfg: SceneConfig, lib: AssetLibrary): House {
     radius = Math.hypot(W, D, roofTopY) * 0.6;
   }
 
+  let fenceSummary = "";
+  if (cfg.fence?.enabled) {
+    const builtFence = buildFence(cfg.fence, cfg.buildingType, lib);
+    root.add(builtFence.group);
+    radius += builtFence.extraRadius * 0.55;
+    fenceSummary = builtFence.summary;
+  }
+
   const storyText = floors === 1 ? "single-story" : `${floors}-story`;
   const description =
     `3D architectural model of a ${storyText} ${res ? "residential house with attached garage and covered porch" : "commercial building"} ` +
     `with a ${cfg.slope} slope ${cfg.material === "tpo" ? "TPO" : cfg.material === "epdm" ? "EPDM" : cfg.material === "modbit" ? "modified bitumen" : cfg.material} roof` +
-    `${cfg.damaged ? ", showing damaged areas" : ""}${cfg.solar ? ", with solar panels" : ""}. Drag to rotate, scroll or pinch to zoom close.`;
+    `${cfg.damaged ? ", showing damaged areas" : ""}${cfg.solar ? ", with solar panels" : ""}${fenceSummary}. Drag to rotate, scroll or pinch to zoom close.`;
 
   return {
     group: root,

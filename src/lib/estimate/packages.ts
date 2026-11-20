@@ -1,4 +1,5 @@
-import type { Answers, Material } from "./questions";
+import { getFenceStyle, type FenceTier } from "./fences";
+import type { Answers, Material, ServiceId } from "./questions";
 
 export type Tier = {
   name: string;
@@ -8,8 +9,7 @@ export type Tier = {
 };
 
 /**
- * Placeholder package copy — edit freely. Pricing is intentionally not shown:
- * final pricing is set after the free on-site inspection.
+ * Placeholder package copy — edit freely. Final pricing is confirmed after the free on-site inspection.
  */
 const catalog: Record<Material, Tier[]> = {
   asphalt: [
@@ -32,7 +32,6 @@ const catalog: Record<Material, Tier[]> = {
     { name: "Signature", tagline: "Reinforced, UV-protected", recommended: true, features: ["Granulated cap sheet", "Insulation board layer", "Reinforced flashing & drains", "20-year system warranty"] },
     { name: "Premium", tagline: "Maximum durability", features: ["Three-ply system with cover board", "Tapered insulation for drainage", "Reflective coating", "30-year system warranty"] },
   ],
-  // Not offered as new-roof choices today, but kept so the type stays exhaustive.
   epdm: [],
   tile: [],
   cedar: [],
@@ -43,10 +42,34 @@ export function getPackages(a: Partial<Answers>): Tier[] {
   return catalog[type];
 }
 
-export function getCallouts(a: Partial<Answers>): { title: string; text: string }[] {
+export function getFencePackages(a: Partial<Answers>): FenceTier[] {
+  return getFenceStyle(a.fenceStyle).packages;
+}
+
+export function getCallouts(a: Partial<Answers>, services: ServiceId[] = ["roofing"]): { title: string; text: string }[] {
   const out: { title: string; text: string }[] = [];
-  if (a.damage === "yes") out.push({ title: "Priority leak response", text: "Because you reported leaks or damage, we’ll prioritize your inspection and can tarp or patch problem areas right away." });
-  if (a.solar === "yes") out.push({ title: "Solar-ready roofing", text: "We’ll plan decking, flashing and layout so panels can be installed on your new roof without compromising the warranty." });
-  if (a.roofAge === "10+" && a.damage !== "yes") out.push({ title: "Age-related inspection", text: "Roofs over ten years old often have hidden wear. Our inspection checks decking, flashing and ventilation, not just the surface." });
+  if (services.includes("roofing")) {
+    if (a.damage === "yes") out.push({ title: "Priority leak response", text: "Because you reported leaks or damage, we’ll prioritize your inspection and can tarp or patch problem areas right away." });
+    if (a.solar === "yes") out.push({ title: "Solar-ready roofing", text: "We’ll plan decking, flashing and layout so panels can be installed on your new roof without compromising the warranty." });
+    if (a.roofAge === "10+" && a.damage !== "yes") out.push({ title: "Age-related inspection", text: "Roofs over ten years old often have hidden wear. Our inspection checks decking, flashing and ventilation, not just the surface." });
+  }
+  if (services.includes("fencing")) {
+    out.push({
+      title: "Property line & utility check",
+      text: "Before digging post holes, we verify linear footage on site, confirm grade slopes, and coordinate utility locates.",
+    });
+    if ((a.fenceGate ?? "yes") === "yes") {
+      out.push({
+        title: "Custom-fitted gates & hardware",
+        text: "Matching walk and driveway gates are framed on heavy structural posts with rust-resistant hinges and latches.",
+      });
+    }
+  }
+  if (services.includes("roofing") && services.includes("fencing")) {
+    out.push({
+      title: "Multi-service bundle scheduling",
+      text: "We coordinate roof tear-off first so heavy equipment never risks damaging your brand-new fence.",
+    });
+  }
   return out;
 }

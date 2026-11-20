@@ -6,14 +6,14 @@ import { breadcrumbSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "3D Roof Estimator & Instant Package Finder",
-  description: `Answer a few quick questions to preview your home or commercial building in 3D and explore matching roofing packages from ${site.name}.`,
+  title: "3D Roof & Fence Estimator & Live Property Decorator",
+  description: `Select roofing, fencing, or both to decorate your home or commercial property in 3D and compare matching packages from ${site.name}.`,
   alternates: { canonical: "/estimate" },
 };
 
 const guarantees = [
-  { title: "Interactive 3D preview", text: "See slope, stories, materials, damage and solar panels live." },
-  { title: "Tailored packages", text: "Options matched specifically to your roof type and goals." },
+  { title: "Interactive 3D preview", text: "Decorate roofs, solar panels, fence styles, finishes, heights & gates live." },
+  { title: "Tailored packages", text: "Roofing and fencing options matched specifically to your property." },
   { title: "Free on-site quote", text: "No obligation, no hidden fees — clear itemized pricing." },
   { title: "Licensed & insured", text: `${site.name} backs every install with a written warranty.` },
 ];
@@ -22,9 +22,9 @@ export default function EstimatePage() {
   return (
     <>
       <PageHeader
-        eyebrow="Interactive 3D Roof Estimator"
-        title="Build your roof in 3D & see matching packages"
-        intro="Answer a quick set of questions about your building. Watch your 3D roof model update in real time, then compare matching roofing packages."
+        eyebrow="Interactive 3D Exterior Estimator"
+        title="Design your roof & fence in 3D"
+        intro="Select roofing, fencing, or both — follow the guided steps or switch to Decorate in 3D to customize styles, finishes, solar panels, and gates live around your house."
         crumbs={[{ name: "3D Estimate" }]}
       />
 
