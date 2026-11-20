@@ -69,21 +69,15 @@ export function PackagesResult({ answers, onEditStep, onStartOver }: Props) {
 
         {/* Packages */}
         <fieldset className="mt-6 border-0 p-0">
-          <legend className="text-sm font-bold text-brand-900">Choose a package to include in your free estimate:</legend>
-          <div className="mt-3 grid gap-4 md:grid-cols-3">
+          <legend className="text-sm font-bold text-brand-900">
+            Choose a package to include in your free estimate:
+          </legend>
+          <div className="mt-4 space-y-3.5">
             {packages.map((pkg) => {
               const checked = selectedPkg === pkg.name;
               const id = `${uid}-pkg-${pkg.name}`;
               return (
-                <label
-                  key={pkg.name}
-                  htmlFor={id}
-                  className={`relative flex cursor-pointer flex-col rounded-2xl border-2 p-5 transition-all ${
-                    checked
-                      ? "border-accent-600 bg-brand-50/40 shadow-md"
-                      : "border-slate-200 bg-white hover:border-slate-300"
-                  }`}
-                >
+                <div key={pkg.name} className="relative">
                   <input
                     id={id}
                     type="radio"
@@ -91,43 +85,70 @@ export function PackagesResult({ answers, onEditStep, onStartOver }: Props) {
                     value={pkg.name}
                     checked={checked}
                     onChange={() => setSelectedPkg(pkg.name)}
-                    className="sr-only"
+                    className="peer sr-only"
                   />
-                  {pkg.recommended && (
-                    <span className="mb-3 inline-flex w-fit rounded-full bg-accent-600 px-2.5 py-0.5 text-xs font-bold text-white">
-                      Most popular
-                    </span>
-                  )}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-heading text-xl font-extrabold text-brand-900">{pkg.name}</span>
-                    <span
-                      aria-hidden="true"
-                      className={`grid size-5 place-items-center rounded-full border-2 ${
-                        checked ? "border-accent-600 bg-accent-600 text-white" : "border-slate-300"
-                      }`}
-                    >
-                      {checked && (
-                        <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="m3 8 3.2 3.2L13 4.5" />
-                        </svg>
-                      )}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm text-slate-600">{pkg.tagline}</p>
-                  <ul className="mt-4 flex-1 space-y-2 border-t border-slate-200/80 pt-4 text-sm text-slate-700">
-                    {pkg.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <svg className="mt-0.5 size-4 shrink-0 text-accent-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                          <path d="m5 12 5 5L20 7" />
-                        </svg>
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-4 text-xs font-bold uppercase tracking-wider text-brand-700">
-                    Free written quote on site
-                  </p>
-                </label>
+                  <label
+                    htmlFor={id}
+                    className={`block cursor-pointer rounded-2xl border-2 p-5 transition-all peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent-600 ${
+                      checked
+                        ? "border-accent-600 bg-orange-50/35 shadow-sm ring-2 ring-accent-600/15"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3.5">
+                        <span
+                          aria-hidden="true"
+                          className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${
+                            checked
+                              ? "border-accent-600 bg-accent-600 text-white"
+                              : "border-slate-300 bg-white"
+                          }`}
+                        >
+                          {checked && (
+                            <svg viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="m3 8 3.2 3.2L13 4.5" />
+                            </svg>
+                          )}
+                        </span>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-heading text-lg font-extrabold text-brand-900 sm:text-xl">
+                              {pkg.name}
+                            </span>
+                            {pkg.recommended && (
+                              <span className="inline-flex items-center rounded-full bg-brand-900 px-2.5 py-0.5 text-xs font-bold text-white">
+                                Most popular
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-sm text-slate-600">{pkg.tagline}</p>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${
+                          checked
+                            ? "bg-accent-600 text-white"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {checked ? "Selected" : "Free on-site quote"}
+                      </span>
+                    </div>
+
+                    <ul className="mt-4 grid gap-x-5 gap-y-2 border-t border-slate-200/80 pt-3.5 text-sm text-slate-700 sm:grid-cols-2">
+                      {pkg.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2">
+                          <svg className="mt-0.5 size-4 shrink-0 text-accent-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="m5 12 5 5L20 7" />
+                          </svg>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </label>
+                </div>
               );
             })}
           </div>

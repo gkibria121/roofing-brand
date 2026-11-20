@@ -30,9 +30,8 @@ export default function HouseViewer({ config, badges, caption }: Props) {
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [rotating, setRotating] = useState(false);
-  const [description, setDescription] = useState("Interactive 3D model of your building.");
+  const [description, setDescription] = useState("Interactive 3D architectural model of your building.");
 
-  // Stable serialized key so scene updates only when model parameters actually change.
   const { slope, stories, buildingType, material, weathering, damaged, solar } = config;
   const initialConfigRef = useRef<SceneConfig>(config);
 
@@ -78,9 +77,9 @@ export default function HouseViewer({ config, badges, caption }: Props) {
       ArrowRight: () => s.orbitBy(step, 0),
       ArrowUp: () => s.orbitBy(0, -step),
       ArrowDown: () => s.orbitBy(0, step),
-      "+": () => s.orbitBy(0, 0, 0.88),
-      "=": () => s.orbitBy(0, 0, 0.88),
-      "-": () => s.orbitBy(0, 0, 1.14),
+      "+": () => s.orbitBy(0, 0, 0.8),
+      "=": () => s.orbitBy(0, 0, 0.8),
+      "-": () => s.orbitBy(0, 0, 1.25),
     };
     const fn = map[e.key];
     if (fn) {
@@ -94,7 +93,7 @@ export default function HouseViewer({ config, badges, caption }: Props) {
     <figure className="m-0">
       <div
         ref={wrapRef}
-        className="roof-canvas-stage relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-b from-sky-100 via-sky-50 to-white shadow-lg sm:aspect-[16/11] lg:aspect-[4/3]"
+        className="roof-canvas-stage relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-b from-[#8dbde8] via-[#cfe3f4] to-[#dce9f5] shadow-lg sm:aspect-[16/11] lg:aspect-[4/3]"
       >
         <canvas
           ref={canvasRef}
@@ -107,12 +106,12 @@ export default function HouseViewer({ config, badges, caption }: Props) {
         />
 
         {!ready && !failed && (
-          <div className="absolute inset-0 grid place-items-center text-sm font-semibold text-slate-500" role="status">
+          <div className="absolute inset-0 grid place-items-center text-sm font-semibold text-brand-900/70" role="status">
             Loading 3D preview…
           </div>
         )}
         {failed && (
-          <div className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-slate-600">
+          <div className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-slate-700">
             Your browser can’t display the 3D preview. You can still complete the questionnaire and see your matching packages.
           </div>
         )}
@@ -132,16 +131,50 @@ export default function HouseViewer({ config, badges, caption }: Props) {
               ))}
             </div>
             <div className="absolute bottom-3 right-3 flex flex-col gap-2" role="group" aria-label="3D view controls">
-              <button type="button" className={btn} onClick={() => sceneRef.current?.setAutoRotate(!rotating)} aria-pressed={rotating} aria-label="Auto-rotate" title="Toggle auto-rotate">
-                <Icon d={rotating ? "M8 5v14M16 5v14" : "M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"} />
+              <button
+                type="button"
+                className={btn}
+                onClick={() => sceneRef.current?.focusRoof()}
+                aria-label="Inspect roof close-up"
+                title="Zoom close to inspect roof"
+              >
+                <Icon d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35M11 8v6M8 11h6" />
               </button>
-              <button type="button" className={btn} onClick={() => sceneRef.current?.orbitBy(0, 0, 0.85)} aria-label="Zoom in" title="Zoom in">
+              <button
+                type="button"
+                className={btn}
+                onClick={() => sceneRef.current?.orbitBy(0, 0, 0.74)}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
                 <Icon d="M12 5v14M5 12h14" />
               </button>
-              <button type="button" className={btn} onClick={() => sceneRef.current?.orbitBy(0, 0, 1.18)} aria-label="Zoom out" title="Zoom out">
+              <button
+                type="button"
+                className={btn}
+                onClick={() => sceneRef.current?.orbitBy(0, 0, 1.35)}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
                 <Icon d="M5 12h14" />
               </button>
-              <button type="button" className={btn} onClick={() => sceneRef.current?.resetView()} aria-label="Reset view" title="Reset camera view">
+              <button
+                type="button"
+                className={btn}
+                onClick={() => sceneRef.current?.setAutoRotate(!rotating)}
+                aria-pressed={rotating}
+                aria-label="Auto-rotate"
+                title="Toggle auto-rotate"
+              >
+                <Icon d={rotating ? "M8 5v14M16 5v14" : "M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"} />
+              </button>
+              <button
+                type="button"
+                className={btn}
+                onClick={() => sceneRef.current?.resetView()}
+                aria-label="Reset view"
+                title="Reset camera view"
+              >
                 <Icon d="M3 11 12 4l9 7M5 10v10h14V10" />
               </button>
             </div>
@@ -149,7 +182,7 @@ export default function HouseViewer({ config, badges, caption }: Props) {
         )}
       </div>
       <figcaption id={helpId} className="mt-2.5 text-center text-xs text-slate-500">
-        {caption ?? "Drag to rotate · scroll or pinch to zoom · arrow keys when focused"}
+        {caption ?? "Drag to rotate · right-drag to pan · scroll or pinch to zoom close · arrow keys when focused"}
       </figcaption>
     </figure>
   );
