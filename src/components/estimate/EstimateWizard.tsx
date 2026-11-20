@@ -10,11 +10,10 @@ import {
 } from "@/lib/estimate/questions";
 import { deriveScene, type PreviewMode } from "@/lib/estimate/sceneConfig";
 import { HouseViewerLazy } from "./HouseViewerLazy";
-import { AddressAutocomplete } from "./AddressAutocomplete";
 import { OptionVisual } from "./OptionVisual";
 import { PackagesResult } from "./PackagesResult";
 
-const NEW_ROOF_STEPS = new Set<StepId>(["desiredType", "solar", "timeline", "financing", "notes"]);
+const NEW_ROOF_STEPS = new Set<StepId>(["desiredType", "solar"]);
 
 export function EstimateWizard() {
   const uid = useId();
@@ -28,7 +27,6 @@ export function EstimateWizard() {
   const [announcement, setAnnouncement] = useState("");
 
   const headingRef = useRef<HTMLElement | null>(null);
-  const addressInputRef = useRef<HTMLInputElement | null>(null);
   const firstRadioRef = useRef<HTMLInputElement | null>(null);
   const didMountRef = useRef(false);
 
@@ -63,7 +61,7 @@ export function EstimateWizard() {
     if (error) setError(null);
     if (id === "desiredType" || id === "solar") {
       setPreviewMode("new");
-    } else if (id === "slope" || id === "stories" || id === "buildingType" || id === "currentMaterial" || id === "roofAge" || id === "damage") {
+    } else {
       setPreviewMode("current");
     }
   }
@@ -84,14 +82,10 @@ export function EstimateWizard() {
   function handleSubmitStep(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!isAnswered(step, answers)) {
-      const msg =
-        step.kind === "address"
-          ? "Please enter a property street address (at least 5 characters)."
-          : "Please choose one of the options above to continue.";
+      const msg = "Please choose one of the options above to continue.";
       setError(msg);
       announce(`Error: ${msg}`);
-      if (step.kind === "address") addressInputRef.current?.focus();
-      else firstRadioRef.current?.focus();
+      firstRadioRef.current?.focus();
       return;
     }
 
@@ -100,12 +94,11 @@ export function EstimateWizard() {
       const nextIndex = stepIndex + 1;
       setStepIndex(nextIndex);
       setMaxReached((m) => Math.max(m, nextIndex));
-      if (NEW_ROOF_STEPS.has(steps[nextIndex].id) && (answers.desiredType || steps[nextIndex].id === "desiredType")) {
-        // Keep current until desiredType is picked, then new preview kicks in.
-        if (answers.desiredType) setPreviewMode("new");
+      if (NEW_ROOF_STEPS.has(steps[nextIndex].id) && answers.desiredType) {
+        setPreviewMode("new");
       }
     } else {
-      // Find first incomplete required step (e.g., if slope changed and invalidated material)
+      // Find first incomplete step (e.g., if slope changed and invalidated material).
       const missingIdx = steps.findIndex((s) => !isAnswered(s, answers));
       if (missingIdx >= 0) {
         setStepIndex(missingIdx);
@@ -150,7 +143,7 @@ export function EstimateWizard() {
       ? `Next: ${steps[stepIndex + 1].summaryLabel}`
       : "Show matching packages";
 
-  const options = step.kind === "single" ? (step.options?.(answers) ?? []) : [];
+  const options = step.options(answers);
   const stepErrorId = `${uid}-step-error`;
   const stepHintId = `${uid}-step-hint`;
 
@@ -170,7 +163,7 @@ export function EstimateWizard() {
                 Live 3D building preview
               </p>
               <p className="text-xs text-slate-500">
-                Updates automatically with your slope, stories, materials &amp; solar choices
+                Every question updates your 3D building and roof in real time
               </p>
             </div>
 
@@ -295,158 +288,96 @@ export function EstimateWizard() {
               </div>
 
               <form onSubmit={handleSubmitStep} noValidate className="mt-7">
-                {step.kind === "address" && (
-                  <div>
-                    <h2
-                      ref={(el) => { headingRef.current = el; }}
-                      tabIndex={-1}
-                      className="text-2xl font-extrabold outline-none sm:text-3xl"
-                    >
-                      {step.title}
-                    </h2>
-                    <div className="mt-5">
-                      <AddressAutocomplete
-                        value={answers.address ?? ""}
-                        onChange={(val) => updateAnswer("address", val)}
-                        hint={step.hint}
-                        error={error ?? undefined}
-                        inputRef={addressInputRef}
-                        onBlurValidate={() => {
-                          const v = (answers.address ?? "").trim();
-                          if (v.length > 0 && v.length < 5) {
-                            setError("Please enter a fuller street address (at least 5 characters).");
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {step.kind === "single" && (
-                  <fieldset
-                    className="border-0 p-0"
-                    aria-describedby={
-                      [step.hint ? stepHintId : null, error ? stepErrorId : null].filter(Boolean).join(" ") ||
-                      undefined
-                    }
+                <fieldset
+                  className="border-0 p-0"
+                  aria-describedby={
+                    [step.hint ? stepHintId : null, error ? stepErrorId : null].filter(Boolean).join(" ") ||
+                    undefined
+                  }
+                >
+                  <legend
+                    ref={(el) => { headingRef.current = el; }}
+                    tabIndex={-1}
+                    className="font-heading text-2xl font-extrabold text-brand-900 outline-none sm:text-3xl"
                   >
-                    <legend
-                      ref={(el) => { headingRef.current = el; }}
-                      tabIndex={-1}
-                      className="font-heading text-2xl font-extrabold text-brand-900 outline-none sm:text-3xl"
-                    >
-                      {step.title}
-                    </legend>
-                    {step.hint && (
-                      <p id={stepHintId} className="mt-2 text-sm text-slate-600">
-                        {step.hint}
-                      </p>
-                    )}
+                    {step.title}
+                  </legend>
+                  {step.hint && (
+                    <p id={stepHintId} className="mt-2 text-sm text-slate-600">
+                      {step.hint}
+                    </p>
+                  )}
 
-                    {/* Branch context pill on Steps 5 and 9 */}
-                    {(step.id === "currentMaterial" || step.id === "desiredType") && answers.slope && (
-                      <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
-                        Showing options for a <span className="capitalize">{answers.slope}</span> roof
-                      </p>
-                    )}
+                  {/* Branch context pill on Current / Desired roof material steps */}
+                  {(step.id === "currentMaterial" || step.id === "desiredType") && answers.slope && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+                      Showing options for a <span className="capitalize">{answers.slope}</span> roof
+                    </p>
+                  )}
 
-                    <div
-                      className={`mt-5 grid gap-3 ${
-                        options.length === 2 ? "sm:grid-cols-2" : options.length === 4 ? "sm:grid-cols-2" : "grid-cols-1"
-                      }`}
-                    >
-                      {options.map((opt, idx) => {
-                        const checked = answers[step.id] === opt.value;
-                        const optId = `${uid}-${step.id}-${opt.value}`;
-                        return (
-                          <div key={opt.value} className="relative">
-                            <input
-                              ref={idx === 0 ? firstRadioRef : undefined}
-                              id={optId}
-                              type="radio"
-                              name={step.id}
-                              value={opt.value}
-                              checked={checked}
-                              required
-                              onChange={() => updateAnswer(step.id, opt.value as Answers[typeof step.id])}
-                              className="peer sr-only"
-                            />
-                            <label
-                              htmlFor={optId}
-                              className={`flex min-h-16 cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-4 transition-all peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent-600 ${
-                                checked
-                                  ? "border-accent-600 bg-brand-50/60 shadow-sm"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
+                  <div
+                    className={`mt-5 grid gap-3 ${
+                      options.length === 2 ? "sm:grid-cols-2" : options.length === 4 ? "sm:grid-cols-2" : "grid-cols-1"
+                    }`}
+                  >
+                    {options.map((opt, idx) => {
+                      const checked = answers[step.id] === opt.value;
+                      const optId = `${uid}-${step.id}-${opt.value}`;
+                      return (
+                        <div key={opt.value} className="relative">
+                          <input
+                            ref={idx === 0 ? firstRadioRef : undefined}
+                            id={optId}
+                            type="radio"
+                            name={step.id}
+                            value={opt.value}
+                            checked={checked}
+                            required
+                            onChange={() => updateAnswer(step.id, opt.value as Answers[typeof step.id])}
+                            className="peer sr-only"
+                          />
+                          <label
+                            htmlFor={optId}
+                            className={`flex min-h-16 cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-4 transition-all peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent-600 ${
+                              checked
+                                ? "border-accent-600 bg-brand-50/60 shadow-sm"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
+                            }`}
+                          >
+                            <OptionVisual stepId={step.id} value={opt.value} />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-base font-bold text-brand-900">{opt.label}</span>
+                              {opt.description && (
+                                <span className="mt-0.5 block text-xs leading-snug text-slate-600">
+                                  {opt.description}
+                                </span>
+                              )}
+                            </span>
+                            <span
+                              aria-hidden="true"
+                              className={`grid size-5 shrink-0 place-items-center rounded-full border-2 ${
+                                checked ? "border-accent-600 bg-accent-600 text-white" : "border-slate-300 bg-white"
                               }`}
                             >
-                              <OptionVisual stepId={step.id} value={opt.value} />
-                              <span className="min-w-0 flex-1">
-                                <span className="block text-base font-bold text-brand-900">{opt.label}</span>
-                                {opt.description && (
-                                  <span className="mt-0.5 block text-xs leading-snug text-slate-600">
-                                    {opt.description}
-                                  </span>
-                                )}
-                              </span>
-                              <span
-                                aria-hidden="true"
-                                className={`grid size-5 shrink-0 place-items-center rounded-full border-2 ${
-                                  checked ? "border-accent-600 bg-accent-600 text-white" : "border-slate-300 bg-white"
-                                }`}
-                              >
-                                {checked && (
-                                  <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="m3 8 3.2 3.2L13 4.5" />
-                                  </svg>
-                                )}
-                              </span>
-                            </label>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {error && (
-                      <p id={stepErrorId} className="mt-3 flex items-center gap-1.5 text-sm font-medium text-red-700">
-                        <span role="img" aria-label="Error">⚠</span>
-                        <span>{error}</span>
-                      </p>
-                    )}
-                  </fieldset>
-                )}
-
-                {step.kind === "text" && (
-                  <div>
-                    <h2
-                      ref={(el) => { headingRef.current = el; }}
-                      tabIndex={-1}
-                      className="text-2xl font-extrabold outline-none sm:text-3xl"
-                    >
-                      {step.title}
-                    </h2>
-                    <div className="mt-4">
-                      <label htmlFor={`${uid}-notes`} className="block text-sm font-semibold text-slate-800">
-                        Project notes <span className="font-normal text-slate-500">(optional)</span>
-                      </label>
-                      {step.hint && (
-                        <p id={stepHintId} className="mt-1 text-sm text-slate-600">
-                          {step.hint}
-                        </p>
-                      )}
-                      <textarea
-                        id={`${uid}-notes`}
-                        name="notes"
-                        rows={4}
-                        enterKeyHint="done"
-                        aria-describedby={step.hint ? stepHintId : undefined}
-                        value={answers.notes ?? ""}
-                        onChange={(e) => updateAnswer("notes", e.target.value)}
-                        placeholder="Tell us about skylights, gutters, HOA rules, gate access, or preferred inspection times…"
-                        className="field-control mt-2.5 block w-full rounded-xl border border-slate-300 bg-white p-3.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-700"
-                      />
-                    </div>
+                              {checked && (
+                                <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="m3 8 3.2 3.2L13 4.5" />
+                                </svg>
+                              )}
+                            </span>
+                          </label>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+
+                  {error && (
+                    <p id={stepErrorId} className="mt-3 flex items-center gap-1.5 text-sm font-medium text-red-700">
+                      <span role="img" aria-label="Error">⚠</span>
+                      <span>{error}</span>
+                    </p>
+                  )}
+                </fieldset>
 
                 {/* Navigation footer */}
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">

@@ -46,10 +46,7 @@ export function getPackages(a: Partial<Answers>): Tier[] {
 export function getCallouts(a: Partial<Answers>): { title: string; text: string }[] {
   const out: { title: string; text: string }[] = [];
   if (a.damage === "yes") out.push({ title: "Priority leak response", text: "Because you reported leaks or damage, we’ll prioritize your inspection and can tarp or patch problem areas right away." });
-  if (a.insurance === "yes" || a.financing === "insurance") out.push({ title: "Insurance claim support", text: "We document damage with photos and reports and can meet your adjuster on site." });
   if (a.solar === "yes") out.push({ title: "Solar-ready roofing", text: "We’ll plan decking, flashing and layout so panels can be installed on your new roof without compromising the warranty." });
-  if (a.financing === "financing") out.push({ title: "Financing options", text: "We’ll review monthly payment options with your estimate." });
-  if (a.timeline === "asap") out.push({ title: "Fast scheduling", text: "You asked for the earliest availability — call us for the quickest inspection slot." });
   if (a.roofAge === "10+" && a.damage !== "yes") out.push({ title: "Age-related inspection", text: "Roofs over ten years old often have hidden wear. Our inspection checks decking, flashing and ventilation, not just the surface." });
   return out;
 }

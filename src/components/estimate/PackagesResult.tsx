@@ -59,14 +59,7 @@ export function PackagesResult({ answers, onEditStep, onStartOver }: Props) {
                 {answers.stories === "multiple" ? "multi-story" : "single-story"}{" "}
                 {answers.buildingType ?? "residential"}
               </strong>{" "}
-              property
-              {answers.address ? (
-                <>
-                  {" "}
-                  at <strong className="text-brand-900">{answers.address}</strong>
-                </>
-              ) : null}
-              . Exact pricing is confirmed after our free on-site inspection.
+              property. Exact pricing is confirmed after our free on-site inspection.
             </p>
           </div>
           <button type="button" onClick={onStartOver} className="btn btn-secondary text-sm">
