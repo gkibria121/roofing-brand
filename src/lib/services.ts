@@ -42,7 +42,7 @@ export const services: Service[] = [
     short: "Fast leak repair, storm damage response and emergency tarping.",
     description:
       "A small leak can become a big problem fast. Our crews find the source, make lasting repairs and help you document storm damage for insurance claims.",
-    image: "/images/repair.jpg",
+    image: "/images/repair.svg",
     features: [
       "Leak detection and repair",
       "Storm & hail damage assessment",
@@ -56,7 +56,7 @@ export const services: Service[] = [
     short: "Standing-seam and metal panel roofs that last 50+ years.",
     description:
       "Energy-efficient, fire-resistant and virtually maintenance-free. Metal roofing is a premium long-term investment that looks great on both modern and traditional homes.",
-    image: "/images/metal.jpg",
+    image: "/images/metal.svg",
     features: [
       "Standing-seam & metal panels",
       "Wide range of colors and finishes",
