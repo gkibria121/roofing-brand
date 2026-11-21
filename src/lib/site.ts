@@ -3,14 +3,22 @@
  * Replace the placeholder values below with the real ones — they feed the
  * header, footer, contact page, metadata, sitemap and structured data (JSON-LD).
  */
+
+const normalizedSiteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.tsroofingsystems.com"
+).replace(/\/+$/, "");
+
+/** Stable ISO date representing the latest substantive marketing-content update (used by sitemap.xml). */
+export const SITE_CONTENT_UPDATED_AT = "2026-11-21";
+
 export const site = {
   name: "T&S Roofing Systems",
   shortName: "T&S Roofing",
   tagline: "Roofing you can trust, built to last.",
   description:
-    "T&S Roofing Systems provides professional residential and commercial roofing: roof replacement, repair, metal roofing, flat roofing, inspections and 24/7 emergency service. Free written estimates.",
+    "T&S Roofing Systems installs residential and commercial roofing (asphalt, standing-seam metal, TPO flat roofs) and custom fencing. Preview your property in 3D and request a free written estimate.",
   // Production URL (no trailing slash). Set NEXT_PUBLIC_SITE_URL in your host.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.tsroofingsystems.com",
+  url: normalizedSiteUrl,
   phone: "1-888-374-3661",
   phoneHref: "+18883743661",
   email: "info@tsroofingsystems.com",
@@ -35,6 +43,7 @@ export const site = {
     "Dallas–Fort Worth",
     "Austin & Central Texas",
     "Miami & South Florida",
+    "Greater Chicago",
   ],
   foundingYear: 2005,
   licenseNumber: "License # 000000",
@@ -53,14 +62,35 @@ export const site = {
   ],
 } as const;
 
+const PLACEHOLDER_SOCIAL_URLS = new Set([
+  "https://www.facebook.com/",
+  "https://www.facebook.com",
+  "https://www.instagram.com/",
+  "https://www.instagram.com",
+  "https://www.google.com/maps",
+  "https://www.google.com/maps/",
+]);
+
+/**
+ * Returns only verified, non-placeholder profile URLs for Schema.org `sameAs`.
+ * Prevents emitting generic root domains (like facebook.com/) that harm entity reconciliation.
+ */
+export function getVerifiedSocialUrls(): string[] {
+  return [site.social.facebook, site.social.instagram, site.social.googleProfile].filter(
+    (url) => url.startsWith("https://") && !PLACEHOLDER_SOCIAL_URLS.has(url),
+  );
+}
+
 export const navLinks = [
   { href: "/products", label: "Products" },
+  { href: "/services", label: "Services" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/blog", label: "Blog" },
   { href: "/portal", label: "Customer Portal" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/search", label: "Search" },
 ] as const;
 
 export const productNavItems = [

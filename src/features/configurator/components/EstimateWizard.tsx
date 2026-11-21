@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   applyAnswer,
@@ -16,8 +15,8 @@ import {
   updateConfigurationTier,
   type SavedConfiguration,
 } from "../domain/quote";
-import type { Answers, PreviewMode, PropertyAddress, ServiceId, StepId } from "../domain/schemas";
-import { parseConfiguratorState, serializeConfiguratorState } from "../domain/validation";
+import type { Answers, ConfiguratorState, PreviewMode, PropertyAddress, ServiceId, StepId } from "../domain/schemas";
+import { serializeConfiguratorState } from "../domain/validation";
 import { CustomQuoteStep } from "./CustomQuoteStep";
 import { GuidedSteps } from "./GuidedSteps";
 import { HouseViewerLazy } from "./HouseViewerLazy";
@@ -45,10 +44,17 @@ const FALLBACK_SHARED_ADDRESS: PropertyAddress = {
   nearbyStreets: ["E Spring Valley Rd", "Woodhaven Pl", "Bowser Rd", "Morningstar Trail"],
 };
 
-export function EstimateWizard() {
+export function EstimateWizard({
+  initialState = null,
+  initialZip = "",
+}: {
+  /** Server-parsed configurator state from URL searchParams (enables immediate SSR without Suspense bailout). */
+  initialState?: ConfiguratorState | null;
+  /** Optional server-parsed 5-digit ZIP preloaded from regional links (?zip=75081). */
+  initialZip?: string;
+} = {}) {
   const uid = useId();
-  const searchParams = useSearchParams();
-  const initialFromUrl = useMemo(() => parseConfiguratorState(searchParams), [searchParams]);
+  const initialFromUrl = initialState;
 
   // Starts on the 3D preview + ZIP lookup gate unless a shared 3D URL is opened directly.
   const [stage, setStage] = useState<Stage>(() => (initialFromUrl ? "configure" : "lookup"));
@@ -496,7 +502,7 @@ export function EstimateWizard() {
             {/* Right column: Stage 1 ZIP Lookup OR Stage 2 Service Selector + Guided / Live Decorator */}
             {stage === "lookup" ? (
               <ZipAddressLookup
-                initialZip={selectedAddress?.zip ?? ""}
+                initialZip={selectedAddress?.zip ?? initialZip}
                 onSelectAddress={handleSelectAddress}
                 onHighlightAddress={setHighlightedAddress}
               />

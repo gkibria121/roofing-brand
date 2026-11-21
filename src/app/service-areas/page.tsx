@@ -4,15 +4,26 @@ import { CtaBand } from "@/components/CtaBand";
 import { JsonLd } from "@/components/JsonLd";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceAreaZipChecker } from "@/components/ServiceAreaZipChecker";
-import { breadcrumbSchema } from "@/lib/schema";
+import { breadcrumbSchema, serviceAreasListSchema, webPageSchema } from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
 import { SERVICE_AREAS } from "@/lib/serviceAreas";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+const serviceAreasDescription = `Check whether ${site.name} installs roofing systems and custom fencing in your ZIP code. Explore local markets in Richardson, Dallas–Fort Worth, Austin, Miami, and Greater Chicago.`;
+
+export const metadata: Metadata = buildPageMetadata({
   title: "Service Areas — Roofing & Custom Fencing Regions",
-  description: `Check whether ${site.name} installs roofing systems and custom fencing in your ZIP code. Explore local markets, climate specs, and typical install timelines.`,
-  alternates: { canonical: "/service-areas" },
-};
+  description: serviceAreasDescription,
+  path: "/service-areas",
+  keywords: [
+    "roofing contractor service areas",
+    "Richardson TX roofing and fencing",
+    "Dallas Fort Worth roof replacement",
+    "Austin solar metal roofing",
+    "Miami hurricane rated roofing",
+    "Chicago roofing and fencing",
+  ],
+});
 
 export default function ServiceAreasPage() {
   return (
@@ -22,6 +33,7 @@ export default function ServiceAreasPage() {
         title="Where we install roofs & custom fences"
         intro="Licensed, insured local crews delivering rapid on-site inspections, HOA-ready proposals, and clean 1–3 day installations."
         crumbs={[{ name: "Service Areas" }]}
+        currentPath="/service-areas"
       />
 
       <section className="section" aria-label="Service areas list">
@@ -41,7 +53,11 @@ export default function ServiceAreasPage() {
                     </span>
                     <span className="text-xs font-bold text-slate-500">Avg. {area.avgInstallDays}</span>
                   </div>
-                  <h2 className="mt-4 text-xl font-extrabold">{area.name}</h2>
+                  <h2 className="mt-4 text-xl font-extrabold">
+                    <Link href={`/service-areas/${area.slug}`} className="hover:text-accent-700">
+                      {area.name}
+                    </Link>
+                  </h2>
                   <p className="mt-2 text-sm text-slate-600">{area.description}</p>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {area.sampleZips.map((z) => (
@@ -60,10 +76,10 @@ export default function ServiceAreasPage() {
                     href={`/service-areas/${area.slug}`}
                     className="text-sm font-bold text-brand-900 underline decoration-accent-600 decoration-2 underline-offset-4 hover:text-accent-700"
                   >
-                    View local details →
+                    View local details<span className="sr-only"> for {area.name}</span> →
                   </Link>
-                  <Link href="/get-a-quote" className="text-xs font-bold text-slate-500 hover:text-brand-900">
-                    Get a Quote
+                  <Link href={`/estimate?zip=${area.featuredZip}`} className="text-xs font-bold text-slate-600 hover:text-brand-900">
+                    3D Quote ({area.featuredZip})
                   </Link>
                 </div>
               </article>
@@ -76,7 +92,18 @@ export default function ServiceAreasPage() {
         title="Don’t see your neighborhood listed?"
         text="Enter your ZIP code in our 3D estimator or call our team directly to check regional crew availability."
       />
-      <JsonLd data={breadcrumbSchema([{ name: "Service Areas", path: "/service-areas" }])} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            type: "CollectionPage",
+            name: `Service Areas | ${site.name}`,
+            description: serviceAreasDescription,
+            path: "/service-areas",
+          }),
+          serviceAreasListSchema(),
+          breadcrumbSchema([{ name: "Service Areas", path: "/service-areas" }]),
+        ]}
+      />
     </>
   );
 }

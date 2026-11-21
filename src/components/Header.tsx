@@ -263,6 +263,7 @@ export function Header() {
   const onServiceAreas = pathname.startsWith("/service-areas");
   const onBlog = pathname.startsWith("/blog");
   const onPortal = pathname.startsWith("/portal");
+  const onSearch = pathname.startsWith("/search");
 
   const topLinkCls =
     "inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-brand-900 aria-[current=page]:text-brand-900 aria-[current=page]:underline aria-[current=page]:decoration-accent-600 aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8";
@@ -330,6 +331,8 @@ export function Header() {
                       src={productsMegaMenu.promo.image}
                       alt=""
                       fill
+                      loading="lazy"
+                      fetchPriority="low"
                       sizes="340px"
                       aria-hidden="true"
                       className="object-cover object-right opacity-55"
@@ -395,6 +398,8 @@ export function Header() {
                         src={card.image}
                         alt={card.alt}
                         fill
+                        loading="lazy"
+                        fetchPriority="low"
                         sizes="(max-width: 640px) 44vw, 155px"
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
@@ -512,6 +517,31 @@ export function Header() {
                   <path d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12Zm0 2c-3.87 0-7 2.02-7 4.5V20h14v-1.5c0-2.48-3.13-4.5-7-4.5Z" />
                 </svg>
                 <span>Customer Portal</span>
+              </Link>
+            </li>
+
+            {/* Site Search */}
+            <li>
+              <Link
+                href="/search"
+                onClick={closeAllPopovers}
+                aria-current={onSearch ? "page" : undefined}
+                className={`w-full ${topLinkCls}`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-4 shrink-0 text-brand-700"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                <span className="nav-search-label">Search</span>
               </Link>
             </li>
 

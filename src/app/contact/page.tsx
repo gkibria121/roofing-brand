@@ -1,24 +1,36 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/PageHeader";
+import Link from "next/link";
 import { ContactForm } from "@/components/ContactForm";
 import { JsonLd } from "@/components/JsonLd";
-import { breadcrumbSchema } from "@/lib/schema";
+import { PageHeader } from "@/components/PageHeader";
+import { breadcrumbSchema, webPageSchema } from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
+import { SERVICE_AREAS } from "@/lib/serviceAreas";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact Us — Free Roofing Estimate",
-  description: `Request a free roofing estimate from ${site.name}. Call ${site.phone} or send us a message. 24/7 emergency service available.`,
-  alternates: { canonical: "/contact" },
-};
+const contactDescription = `Contact ${site.name} for a free roofing or custom fencing estimate. Call ${site.phone} for 24/7 emergency roof repair or message our team in Richardson, TX.`;
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Contact Us — Free Roofing & Fencing Estimate",
+  description: contactDescription,
+  path: "/contact",
+  keywords: [
+    "contact T&S Roofing Systems",
+    "emergency roof repair phone number",
+    "Richardson TX roofing office",
+    "free roofing inspection",
+  ],
+});
 
 export default function ContactPage() {
   return (
     <>
       <PageHeader
         eyebrow="Contact"
-        title="Get your free roofing estimate"
+        title="Get your free roofing & fencing estimate"
         intro="Tell us about your project and we’ll get back to you within one business day. For emergencies, call us any time."
         crumbs={[{ name: "Contact" }]}
+        currentPath="/contact"
       />
       <div className="container-x grid gap-10 py-16 lg:grid-cols-[1.3fr_1fr] lg:py-20">
         <ContactForm />
@@ -36,11 +48,32 @@ export default function ContactPage() {
           </address>
           <div className="rounded-2xl border border-slate-200 p-6">
             <h2 className="text-xl font-extrabold">Areas we serve</h2>
-            <p className="mt-3 text-slate-600">{site.serviceAreas.join(", ")}</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {SERVICE_AREAS.map((area) => (
+                <li key={area.slug}>
+                  <Link
+                    href={`/service-areas/${area.slug}`}
+                    className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-brand-900 hover:border-accent-600 hover:text-accent-700"
+                  >
+                    {area.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </aside>
       </div>
-      <JsonLd data={breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }])} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            type: "ContactPage",
+            name: `Contact ${site.name}`,
+            description: contactDescription,
+            path: "/contact",
+          }),
+          breadcrumbSchema([{ name: "Contact", path: "/contact" }]),
+        ]}
+      />
     </>
   );
 }

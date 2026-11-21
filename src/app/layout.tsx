@@ -20,17 +20,29 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} | Residential & Commercial Roofing Contractor`,
+    default: `${site.name} | Residential & Commercial Roofing & Custom Fencing`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
   applicationName: site.name,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
+  publisher: site.name,
+  category: "Home Improvement",
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   keywords: [
     "roofing contractor",
     "roof replacement",
     "roof repair",
-    "metal roofing",
-    "commercial roofing",
+    "standing-seam metal roofing",
+    "commercial TPO roofing",
+    "custom privacy fencing",
+    "3D roof and fence estimator",
     "emergency roof repair",
     "T&S Roofing Systems",
   ],
@@ -40,20 +52,26 @@ export const metadata: Metadata = {
     siteName: site.name,
     locale: "en_US",
     url: "/",
-    title: `${site.name} | Roofing you can trust`,
+    title: `${site.name} | Residential & Commercial Roofing & Custom Fencing`,
     description: site.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} | Roofing you can trust`,
+    title: `${site.name} | Residential & Commercial Roofing & Custom Fencing`,
     description: site.description,
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
-  // Paste your Google Search Console verification token here (or via env var).
+  // Paste your Google Search Console verification token via NEXT_PUBLIC_GSC_VERIFICATION.
   verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
     : undefined,
@@ -70,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <Header />
-        <main id="main" className="flex-1">
+        <main id="main" tabIndex={-1} className="flex-1 outline-none">
           {children}
         </main>
         <Footer />

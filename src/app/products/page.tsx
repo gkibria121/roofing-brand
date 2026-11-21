@@ -4,14 +4,30 @@ import { CtaBand } from "@/components/CtaBand";
 import { JsonLd } from "@/components/JsonLd";
 import { PageHeader } from "@/components/PageHeader";
 import { FENCE_CATALOG, ROOF_MATERIAL_CATALOG } from "@/features/configurator";
-import { breadcrumbSchema } from "@/lib/schema";
+import {
+  breadcrumbSchema,
+  fencingProductsSchema,
+  roofingProductsSchema,
+  webPageSchema,
+} from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+const productsDescription = `Explore residential and commercial roofing systems and 6 custom fencing lines installed by ${site.name}. Compare per-sq-ft and per-foot rates and preview every style live in 3D.`;
+
+export const metadata: Metadata = buildPageMetadata({
   title: "Roofing & Custom Fencing Products",
-  description: `Explore residential and commercial roofing systems and 6 custom fencing lines installed by ${site.name}. Preview every style live in 3D.`,
-  alternates: { canonical: "/products" },
-};
+  description: productsDescription,
+  path: "/products",
+  keywords: [
+    "roofing materials catalog",
+    "architectural asphalt shingles",
+    "standing-seam metal roofing",
+    "commercial TPO flat roof",
+    "Western Red Cedar privacy fence",
+    "horizontal modern slat fence",
+  ],
+});
 
 export default function ProductsPage() {
   const newRoofs = ROOF_MATERIAL_CATALOG.filter((m) => m.offeredAsNew);
@@ -23,6 +39,7 @@ export default function ProductsPage() {
         title="Roofing systems & custom fencing built to last"
         intro="Every material below is backed by our written workmanship warranty and can be customized live on your home in our 3D estimator."
         crumbs={[{ name: "Products" }]}
+        currentPath="/products"
       />
 
       {/* Category summary cards */}
@@ -40,16 +57,21 @@ export default function ProductsPage() {
               </p>
               <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
                 {newRoofs.map((mat) => (
-                  <li key={mat.id} className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 px-3.5 py-2.5">
-                    <span
-                      className="size-5 shrink-0 rounded-md border border-black/15"
-                      style={{ backgroundColor: mat.baseColor }}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-bold text-brand-900">{mat.label}</span>
-                      <span className="block text-xs text-slate-500">From ~${mat.pricePerSqFt.toFixed(2)}/sq ft</span>
-                    </span>
+                  <li key={mat.id}>
+                    <Link
+                      href={`/products/roofing#${mat.id}`}
+                      className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 px-3.5 py-2.5 transition-colors hover:border-accent-600/50 hover:bg-orange-50/40"
+                    >
+                      <span
+                        className="size-5 shrink-0 rounded-md border border-black/15"
+                        style={{ backgroundColor: mat.baseColor }}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-bold text-brand-900">{mat.label}</span>
+                        <span className="block text-xs text-slate-500">From ~${mat.pricePerSqFt.toFixed(2)}/sq ft</span>
+                      </span>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -59,7 +81,7 @@ export default function ProductsPage() {
                 Explore Roofing Systems →
               </Link>
               <Link href="/estimate?services=roofing&mode=decorate&view=new" className="btn btn-secondary">
-                Preview in 3D
+                Preview Roofing in 3D
               </Link>
             </div>
           </div>
@@ -76,16 +98,21 @@ export default function ProductsPage() {
               </p>
               <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
                 {FENCE_CATALOG.map((fence) => (
-                  <li key={fence.id} className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 px-3.5 py-2.5">
-                    <span
-                      className="size-5 shrink-0 rounded-md border border-black/15"
-                      style={{ backgroundColor: fence.finishes[0]?.color ?? "#9c6b43" }}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-bold text-brand-900">{fence.label}</span>
-                      <span className="block text-xs text-slate-500">From ~${fence.pricePerLinearFt.toFixed(2)}/ft</span>
-                    </span>
+                  <li key={fence.id}>
+                    <Link
+                      href={`/products/fencing#${fence.id}`}
+                      className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 px-3.5 py-2.5 transition-colors hover:border-accent-600/50 hover:bg-orange-50/40"
+                    >
+                      <span
+                        className="size-5 shrink-0 rounded-md border border-black/15"
+                        style={{ backgroundColor: fence.finishes[0]?.color ?? "#9c6b43" }}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-bold text-brand-900">{fence.label}</span>
+                        <span className="block text-xs text-slate-500">From ~${fence.pricePerLinearFt.toFixed(2)}/ft</span>
+                      </span>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -95,7 +122,7 @@ export default function ProductsPage() {
                 Explore Fencing Catalog →
               </Link>
               <Link href="/estimate?services=fencing&mode=decorate" className="btn btn-secondary">
-                Preview in 3D
+                Preview Fencing in 3D
               </Link>
             </div>
           </div>
@@ -106,7 +133,19 @@ export default function ProductsPage() {
         title="Bundle your roof & fence for seamless scheduling"
         text="Enter your ZIP code to preview both roofing and fencing together on your property in 3D and get an instant itemized quote."
       />
-      <JsonLd data={breadcrumbSchema([{ name: "Products", path: "/products" }])} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            type: "CollectionPage",
+            name: `Roofing & Custom Fencing Products | ${site.name}`,
+            description: productsDescription,
+            path: "/products",
+          }),
+          roofingProductsSchema(),
+          fencingProductsSchema(),
+          breadcrumbSchema([{ name: "Products", path: "/products" }]),
+        ]}
+      />
     </>
   );
 }

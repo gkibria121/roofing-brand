@@ -1,14 +1,34 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Photo } from "@/components/Photo";
-import { GoogleReviews } from "@/components/GoogleReviews";
-import { Faq } from "@/components/Faq";
 import { CtaBand } from "@/components/CtaBand";
+import { Faq } from "@/components/Faq";
+import { GoogleReviews } from "@/components/GoogleReviews";
 import { JsonLd } from "@/components/JsonLd";
+import { Photo } from "@/components/Photo";
 import { Stars } from "@/components/Stars";
-import { faqSchema } from "@/lib/schema";
-import { processSteps, services } from "@/lib/services";
+import { BLOG_POSTS } from "@/lib/blog";
+import { faqSchema, howToSchema, webPageSchema } from "@/lib/schema";
 import { reviewSummary } from "@/lib/reviews";
+import { buildPageMetadata } from "@/lib/seo";
+import { SERVICE_AREAS } from "@/lib/serviceAreas";
+import { processSteps, services } from "@/lib/services";
 import { site } from "@/lib/site";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: { absolute: `${site.name} | Residential & Commercial Roofing & Custom Fencing` },
+  description: site.description,
+  path: "/",
+  useColocatedOgImage: true,
+  keywords: [
+    "roofing contractor",
+    "roof replacement",
+    "standing-seam metal roofing",
+    "commercial TPO flat roof",
+    "custom privacy fencing",
+    "3D roof and fence estimator",
+    "emergency roof repair",
+  ],
+});
 
 const whyUs = [
   { title: "Licensed, bonded & insured", text: "Full coverage for your peace of mind on every project." },
@@ -32,13 +52,13 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white" aria-labelledby="hero-heading">
         <div className="container-x grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-2 lg:gap-14 lg:py-24">
           <div>
-            <p className="eyebrow">Residential &amp; commercial roofing</p>
+            <p className="eyebrow">Residential &amp; commercial roofing &amp; fencing</p>
             <h1 id="hero-heading" className="mt-4 text-4xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">
               Roofing you can trust, <span className="text-accent-600">built to last.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-slate-600">
-              {site.name} installs, repairs and replaces roofs with honest pricing, expert crews and warranties we
-              stand behind. Serving {site.serviceAreas.slice(0, 2).join(", ")} and surrounding areas.
+              {site.name} installs, repairs and replaces roofs and custom fences with honest pricing, expert crews and
+              warranties we stand behind. Serving {site.serviceAreas.slice(0, 2).join(", ")} and surrounding markets.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/estimate" className="btn btn-primary btn-lg">Build Your 3D Estimate</Link>
@@ -57,9 +77,10 @@ export default function HomePage() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl ring-1 ring-slate-200">
               <Photo
                 src="/images/hero.jpg"
-                alt="Modern home with a freshly installed charcoal shingle roof"
+                alt="Modern home with a freshly installed charcoal architectural shingle roof by T&S Roofing Systems"
                 fill
-                priority
+                preload
+                fetchPriority="high"
                 sizes="(min-width: 1024px) 600px, 100vw"
                 className="object-cover"
               />
@@ -90,8 +111,8 @@ export default function HomePage() {
         <div className="container-x">
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">What we do</p>
-            <h2 id="services-heading" className="mt-3 text-3xl font-extrabold sm:text-4xl">Roofing services for every need</h2>
-            <p className="mt-4 text-slate-600">From a small repair to a full replacement, one expert team handles it all.</p>
+            <h2 id="services-heading" className="mt-3 text-3xl font-extrabold sm:text-4xl">Roofing &amp; exterior services for every need</h2>
+            <p className="mt-4 text-slate-600">From a small leak repair to a full roof replacement or custom fence, one expert team handles it all.</p>
           </div>
           <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
@@ -100,10 +121,10 @@ export default function HomePage() {
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                     <Photo
                       src={s.image}
-                      alt=""
+                      alt={s.imageAlt}
                       fill
                       loading="lazy"
-                      sizes="(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw"
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
@@ -118,6 +139,14 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link href="/products/roofing" className="btn btn-secondary">
+              Compare Roofing Systems
+            </Link>
+            <Link href="/products/fencing" className="btn btn-secondary">
+              Explore Custom Fencing
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -127,7 +156,7 @@ export default function HomePage() {
           <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-xl ring-1 ring-slate-200">
             <Photo
               src="/images/residential.jpg"
-              alt="T&S Roofing crew installing shingles on a residential roof"
+              alt="T&S Roofing Systems crew completing a precision architectural shingle installation"
               fill
               loading="lazy"
               sizes="(min-width: 1024px) 600px, 100vw"
@@ -172,19 +201,87 @@ export default function HomePage() {
               </li>
             ))}
           </ol>
+          <div className="mt-8 text-center">
+            <Link href="/how-it-works" className="text-sm font-bold text-brand-900 underline decoration-accent-600 decoration-2 underline-offset-4 hover:text-accent-700">
+              See our full 4-step process &amp; permitting details →
+            </Link>
+          </div>
         </div>
       </section>
 
       <GoogleReviews />
 
-      {/* Service area */}
+      {/* Service areas */}
       <section className="section" aria-labelledby="areas-heading">
         <div className="container-x text-center">
-          <p className="eyebrow">Service area</p>
-          <h2 id="areas-heading" className="mt-3 text-3xl font-extrabold sm:text-4xl">Proudly serving our community</h2>
-          <ul className="mx-auto mt-8 flex max-w-3xl flex-wrap justify-center gap-3">
-            {site.serviceAreas.map((a) => (
-              <li key={a} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-brand-900">{a}</li>
+          <p className="eyebrow">Service areas</p>
+          <h2 id="areas-heading" className="mt-3 text-3xl font-extrabold sm:text-4xl">Proudly serving our communities</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+            Explore climate-engineered roofing and fencing specs, popular local finishes, and ZIP code coverage in your area.
+          </p>
+          <ul className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-3">
+            {SERVICE_AREAS.map((area) => (
+              <li key={area.slug}>
+                <Link
+                  href={`/service-areas/${area.slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-brand-900 transition-colors hover:border-accent-600 hover:bg-orange-50/50 hover:text-accent-700"
+                >
+                  <span>{area.name}</span>
+                  <span className="text-xs text-slate-500">({area.state})</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6">
+            <Link href="/service-areas" className="text-sm font-bold text-accent-700 hover:underline">
+              Check your 5-digit ZIP code coverage →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured homeowner guides */}
+      <section className="section border-t border-slate-200 bg-slate-50" aria-labelledby="guides-heading">
+        <div className="container-x">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Homeowner resources</p>
+              <h2 id="guides-heading" className="mt-2 text-3xl font-extrabold sm:text-4xl">
+                Latest roofing &amp; fencing guides
+              </h2>
+            </div>
+            <Link
+              href="/blog"
+              className="text-sm font-bold text-brand-900 underline decoration-accent-600 decoration-2 underline-offset-4 hover:text-accent-700"
+            >
+              Read all guides →
+            </Link>
+          </div>
+
+          <ul className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {BLOG_POSTS.map((post) => (
+              <li key={post.slug}>
+                <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs transition-shadow hover:shadow-md">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-bold">
+                      <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-brand-900">{post.category}</span>
+                      <span className="text-slate-500">{post.readMinutes} min read</span>
+                    </div>
+                    <h3 className="mt-3 text-base font-extrabold leading-snug">
+                      <Link href={`/blog/${post.slug}`} className="hover:text-accent-700">
+                        {post.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-600">{post.excerpt}</p>
+                  </div>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="mt-4 inline-block text-xs font-bold text-accent-700 hover:underline"
+                  >
+                    Read guide<span className="sr-only">: {post.title}</span> →
+                  </Link>
+                </article>
+              </li>
             ))}
           </ul>
         </div>
@@ -192,7 +289,22 @@ export default function HomePage() {
 
       <Faq />
       <CtaBand />
-      <JsonLd data={faqSchema()} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            name: `${site.name} — Residential & Commercial Roofing & Custom Fencing`,
+            description: site.description,
+            path: "/",
+          }),
+          howToSchema({
+            name: `How to replace your roof or install a custom fence with ${site.name}`,
+            description: "Our 4-step inspection, written quote, certified installation, and final walkthrough process.",
+            path: "/how-it-works",
+            steps: processSteps.map((p) => ({ name: p.title, text: p.text })),
+          }),
+          faqSchema(),
+        ]}
+      />
     </>
   );
 }

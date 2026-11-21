@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { site } from "@/lib/site";
 
@@ -48,7 +48,7 @@ const DEMO_PROJECT = {
   ],
 };
 
-export function CustomerPortalClient() {
+export function CustomerPortalClient({ sidebarSlot }: { sidebarSlot?: ReactNode } = {}) {
   const uid = useId();
   const [email, setEmail] = useState("");
   const [projectCode, setProjectCode] = useState("");
@@ -331,35 +331,7 @@ export function CustomerPortalClient() {
         </div>
       </form>
 
-      <div className="space-y-5 lg:col-span-6">
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
-          <h2 className="text-xl font-extrabold text-brand-900">What’s inside your portal</h2>
-          <ul className="mt-4 space-y-3 text-sm text-slate-700">
-            {[
-              "Real-time milestone tracking from on-site measurement to final walkthrough",
-              "Approved 3D roofing & fencing specifications with locked-in itemized pricing",
-              "Downloadable HOA color packets, permits, inspection photos, and warranty PDFs",
-              "Direct messaging with your assigned Project Manager",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2.5">
-                <span className="mt-0.5 font-bold text-accent-600" aria-hidden="true">✓</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6 border-t border-slate-200 pt-5 text-sm text-slate-600">
-            Need a new quote first?{" "}
-            <Link href="/estimate" className="font-bold text-accent-700 underline underline-offset-4">
-              Start your 3D estimate →
-            </Link>{" "}
-            or call{" "}
-            <a href={`tel:${site.phoneHref}`} className="font-bold text-brand-900">
-              {site.phone}
-            </a>
-            .
-          </div>
-        </div>
-      </div>
+      {sidebarSlot && <div className="space-y-5 lg:col-span-6">{sidebarSlot}</div>}
     </div>
   );
 }

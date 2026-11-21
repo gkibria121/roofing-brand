@@ -1,14 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { lookupAddressesByZip } from "@/features/configurator";
+import { findServiceAreaByZip, type ServiceAreaInfo } from "@/lib/serviceAreas";
 
 export function ServiceAreaZipChecker() {
   const uid = useId();
   const router = useRouter();
   const [zip, setZip] = useState("");
-  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const [status, setStatus] = useState<{
+    ok: boolean;
+    text: string;
+    zip?: string;
+    matchedArea?: ServiceAreaInfo;
+  } | null>(null);
   const [checking, setChecking] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -21,9 +28,12 @@ export function ServiceAreaZipChecker() {
     setChecking(true);
     try {
       const res = await lookupAddressesByZip(clean);
+      const matchedArea = findServiceAreaByZip(clean);
       setStatus({
         ok: true,
-        text: `Great news! We serve ${res.city}, ${res.state} ${res.zip}. Click below to select your address in 3D.`,
+        zip: res.zip,
+        matchedArea,
+        text: `Great news! We serve ${res.city}, ${res.state} ${res.zip}. Launch the 3D estimator with your ZIP preloaded.`,
       });
     } catch {
       setStatus({ ok: false, text: "Could not verify that ZIP code right now. Please try again." });
@@ -38,29 +48,31 @@ export function ServiceAreaZipChecker() {
       <p className="mt-1.5 text-sm text-slate-600">
         Enter any 5-digit ZIP code to confirm local crew coverage and launch your 3D property estimate.
       </p>
-      <form onSubmit={onSubmit} noValidate className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <label htmlFor={`${uid}-zip`} className="sr-only">
-          5-digit ZIP code
-        </label>
-        <input
-          id={`${uid}-zip`}
-          name="postal-code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="postal-code"
-          maxLength={5}
-          value={zip}
-          onChange={(e) => {
-            setZip(e.target.value.replace(/\D/g, "").slice(0, 5));
-            if (status) setStatus(null);
-          }}
-          placeholder="Enter 5-digit ZIP (e.g. 75081)"
-          className="field-control flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-brand-900 focus:border-accent-600"
-        />
-        <button type="submit" disabled={checking} className="btn btn-primary shrink-0">
-          {checking ? "Checking…" : "Check Coverage"}
-        </button>
-      </form>
+      <search>
+        <form onSubmit={onSubmit} noValidate className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <label htmlFor={`${uid}-zip`} className="sr-only">
+            5-digit ZIP code
+          </label>
+          <input
+            id={`${uid}-zip`}
+            name="postal-code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={5}
+            value={zip}
+            onChange={(e) => {
+              setZip(e.target.value.replace(/\D/g, "").slice(0, 5));
+              if (status) setStatus(null);
+            }}
+            placeholder="Enter 5-digit ZIP (e.g. 75081)"
+            className="field-control flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-brand-900 focus:border-accent-600"
+          />
+          <button type="submit" disabled={checking} className="btn btn-primary shrink-0">
+            {checking ? "Checking…" : "Check Coverage"}
+          </button>
+        </form>
+      </search>
 
       {status && (
         <div
@@ -73,13 +85,23 @@ export function ServiceAreaZipChecker() {
         >
           <span>{status.text}</span>
           {status.ok && (
-            <button
-              type="button"
-              onClick={() => router.push("/estimate")}
-              className="btn btn-primary text-xs"
-            >
-              Start 3D Estimate →
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {status.matchedArea && (
+                <Link
+                  href={`/service-areas/${status.matchedArea.slug}`}
+                  className="btn btn-secondary text-xs"
+                >
+                  {status.matchedArea.name} Guide
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => router.push(status.zip ? `/estimate?zip=${status.zip}` : "/estimate")}
+                className="btn btn-primary text-xs"
+              >
+                Start 3D Estimate →
+              </button>
+            </div>
           )}
         </div>
       )}

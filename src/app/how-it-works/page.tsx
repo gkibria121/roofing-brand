@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CtaBand } from "@/components/CtaBand";
+import { Faq } from "@/components/Faq";
 import { JsonLd } from "@/components/JsonLd";
 import { PageHeader } from "@/components/PageHeader";
-import { breadcrumbSchema, faqSchema } from "@/lib/schema";
+import { breadcrumbSchema, faqSchema, howToSchema, webPageSchema } from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+const howItWorksDescription = `See how ${site.name} takes your roofing or custom fencing project from instant ZIP-based 3D design to free on-site measurement, HOA permitting, and licensed 1–3 day installation.`;
+
+export const metadata: Metadata = buildPageMetadata({
   title: "How It Works — From 3D Quote to Finished Install",
-  description: `See how ${site.name} takes your roofing or fencing project from instant ZIP-based 3D design to licensed on-site installation in 4 clear steps.`,
-  alternates: { canonical: "/how-it-works" },
-};
+  description: howItWorksDescription,
+  path: "/how-it-works",
+  keywords: [
+    "roof replacement process",
+    "how 3D roof estimator works",
+    "free roof inspection process",
+    "HOA roofing approval packet",
+    "roof and fence installation timeline",
+  ],
+});
 
 const STEPS = [
   {
@@ -45,7 +56,7 @@ const STEPS = [
       "Our vetted crews complete roof tear-off before fence installation so heavy equipment never risks damaging new boards or posts, followed by magnetic nail sweeps and a final walkthrough.",
     highlights: ["Track every milestone in your Customer Portal", "Full property protection & spotless cleanup", "Backed by up to a 25-year workmanship warranty"],
   },
-];
+] as const;
 
 const FAQS = [
   {
@@ -68,7 +79,7 @@ const FAQS = [
     answer:
       "Every homeowner receives access to the Customer Portal with live milestone updates, inspection photos, scheduled installation dates, and digital warranty certificates.",
   },
-];
+] as const;
 
 export default function HowItWorksPage() {
   return (
@@ -78,40 +89,46 @@ export default function HowItWorksPage() {
         title="How T&S Roofing Systems works"
         intro="From instant ZIP-based 3D design to spotless installation and warranty protection—transparent at every milestone."
         crumbs={[{ name: "How it works" }]}
+        currentPath="/how-it-works"
       />
 
       <section className="section" aria-label="4 step process">
-        <div className="container-x space-y-6">
-          {STEPS.map((step) => (
-            <div
-              key={step.number}
-              className="grid gap-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 md:grid-cols-12 md:items-start"
-            >
-              <div className="md:col-span-3">
-                <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-brand-900 font-heading text-lg font-extrabold text-white">
-                  {step.number}
-                </span>
-                <p className="mt-3 text-xs font-bold uppercase tracking-wider text-accent-700">{step.duration}</p>
-              </div>
-              <div className="md:col-span-9">
-                <h2 className="text-2xl font-extrabold">{step.title}</h2>
-                <p className="mt-2.5 text-slate-600">{step.description}</p>
-                <ul className="mt-4 grid gap-2 sm:grid-cols-3">
-                  {step.highlights.map((h) => (
-                    <li
-                      key={h}
-                      className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-brand-900"
-                    >
-                      <span className="text-accent-600" aria-hidden="true">✓</span>
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
+        <div className="container-x">
+          <ol className="space-y-6">
+            {STEPS.map((step) => (
+              <li
+                key={step.number}
+                className="grid gap-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 md:grid-cols-12 md:items-start"
+              >
+                <div className="md:col-span-3">
+                  <span
+                    className="inline-flex size-12 items-center justify-center rounded-2xl bg-brand-900 font-heading text-lg font-extrabold text-white"
+                    aria-hidden="true"
+                  >
+                    {step.number}
+                  </span>
+                  <p className="mt-3 text-xs font-bold uppercase tracking-wider text-accent-700">{step.duration}</p>
+                </div>
+                <div className="md:col-span-9">
+                  <h2 className="text-2xl font-extrabold">{step.title}</h2>
+                  <p className="mt-2.5 text-slate-600">{step.description}</p>
+                  <ul className="mt-4 grid gap-2 sm:grid-cols-3">
+                    {step.highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-brand-900"
+                      >
+                        <span className="text-accent-600" aria-hidden="true">✓</span>
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ol>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link href="/estimate" className="btn btn-primary btn-lg">
               Start Step 1: Enter Your ZIP Code →
             </Link>
@@ -122,26 +139,36 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      <section className="section border-t border-slate-200 bg-slate-50" aria-label="Frequently asked questions">
-        <div className="container-x max-w-4xl">
-          <h2 className="text-center text-3xl font-extrabold">Common questions about our process</h2>
-          <div className="mt-8 space-y-4">
-            {FAQS.map((item) => (
-              <div key={item.question} className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 className="text-lg font-bold">{item.question}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Faq
+        items={FAQS}
+        eyebrow="Process FAQ"
+        title="Common questions about our process"
+        intro="Everything you need to know about online 3D pricing, HOA packets, permitting, and project tracking."
+        headingId="process-faq-heading"
+        className="section border-t border-slate-200 bg-slate-50"
+      />
 
       <CtaBand
         title="Ready to see your property in 3D?"
         text="Enter your ZIP code, pick your address, and customize your roof or fence with instant pricing."
       />
-      <JsonLd data={breadcrumbSchema([{ name: "How it works", path: "/how-it-works" }])} />
-      <JsonLd data={faqSchema(FAQS)} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            name: `How ${site.name} Works`,
+            description: howItWorksDescription,
+            path: "/how-it-works",
+          }),
+          howToSchema({
+            name: `How to Design & Install a New Roof or Fence with ${site.name}`,
+            description: howItWorksDescription,
+            path: "/how-it-works",
+            steps: STEPS.map((s) => ({ name: s.title, text: s.description })),
+          }),
+          faqSchema(FAQS),
+          breadcrumbSchema([{ name: "How it works", path: "/how-it-works" }]),
+        ]}
+      />
     </>
   );
 }

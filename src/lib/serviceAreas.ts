@@ -1,3 +1,8 @@
+export interface ServiceAreaFaq {
+  question: string;
+  answer: string;
+}
+
 export interface ServiceAreaInfo {
   slug: string;
   name: string;
@@ -12,6 +17,8 @@ export interface ServiceAreaInfo {
   popularRoof: string;
   popularFence: string;
   neighborhoods: readonly string[];
+  updatedAt: string;
+  faqs: readonly ServiceAreaFaq[];
 }
 
 export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
@@ -31,6 +38,19 @@ export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
     popularRoof: "Class 4 Architectural Shingle & Standing-Seam Metal",
     popularFence: "6 ft Western Red Cedar Privacy & Horizontal Modern Slat",
     neighborhoods: ["Canyon Creek", "Richardson Heights", "Arapaho", "Cottonwood Heights", "Reservation", "Springpark"],
+    updatedAt: "2026-11-15",
+    faqs: [
+      {
+        question: "Do you install Class 4 hail-resistant roofs in Richardson, TX?",
+        answer:
+          "Yes. We install UL 2218 Class 4 impact-resistant architectural shingles and heavy-gauge standing-seam metal roofs built for North Texas hailstorms, and we supply documentation many Texas insurers accept for policy discounts.",
+      },
+      {
+        question: "Can you prepare HOA approval packets for Richardson & Plano neighborhoods?",
+        answer:
+          "Yes. Our project managers prepare color swatches, shingle/metal spec sheets, and fence height/stain drawings formatted for Canyon Creek, Reservation, and Plano HOA architectural review boards.",
+      },
+    ],
   },
   {
     slug: "dallas-tx",
@@ -48,6 +68,19 @@ export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
     popularRoof: "Standing-Seam Metal & 60-Mil Reflective TPO",
     popularFence: "Horizontal Modern Slat & Ornamental Aluminum/Iron",
     neighborhoods: ["Lakewood", "Preston Hollow", "Oak Lawn", "Bishop Arts", "Irving", "Frisco"],
+    updatedAt: "2026-11-15",
+    faqs: [
+      {
+        question: "Do you install commercial TPO flat roofs across Dallas–Fort Worth?",
+        answer:
+          "Yes. Our commercial crews install 45-mil, 60-mil, and 80-mil reflective white TPO and multi-ply modified bitumen roofs for warehouses, offices, and retail centers across DFW with minimal business interruption.",
+      },
+      {
+        question: "How quickly can you inspect storm damage in DFW?",
+        answer:
+          "We schedule free photo-documented roof inspections within 24–48 hours across Dallas and Fort Worth, and provide 24/7 emergency tarping when an active leak occurs.",
+      },
+    ],
   },
   {
     slug: "austin-tx",
@@ -65,6 +98,19 @@ export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
     popularRoof: "Solar-Ready Standing-Seam Metal",
     popularFence: "Horizontal Modern Slat (Warm Redwood) & Cedar Privacy",
     neighborhoods: ["South Congress", "Zilker", "Westlake", "Mueller", "Round Rock", "Cedar Park"],
+    updatedAt: "2026-11-15",
+    faqs: [
+      {
+        question: "Why is standing-seam metal popular for Austin solar installations?",
+        answer:
+          "Standing-seam metal lets solar installers clamp racking directly to raised vertical seams with zero roof penetrations, preserving waterproofing while matching the 25–30 year life of modern solar arrays.",
+      },
+      {
+        question: "Do you build horizontal modern slat fences on sloped Austin lots?",
+        answer:
+          "Yes. We custom-frame matte-black steel posts set in deep concrete to step or rack cleanly across Hill Country grades in Westlake, Zilker, and South Austin.",
+      },
+    ],
   },
   {
     slug: "miami-fl",
@@ -82,6 +128,19 @@ export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
     popularRoof: "Coastal Standing-Seam Metal & 80-Mil TPO",
     popularFence: "Wind-Rated Vinyl Privacy & Satin Black Aluminum",
     neighborhoods: ["Coral Gables", "Coconut Grove", "Brickell", "Pinecrest", "Kendall", "Doral"],
+    updatedAt: "2026-11-15",
+    faqs: [
+      {
+        question: "Do your Miami roofing systems meet HVHZ wind-uplift requirements?",
+        answer:
+          "Yes. We specify Florida Building Code / High-Velocity Hurricane Zone compliant underlayments, concealed-fastener coastal metal panels, and reinforced flat TPO assemblies engineered for high wind uplift.",
+      },
+      {
+        question: "Which fence materials resist South Florida salt air and humidity best?",
+        answer:
+          "Powder-coated architectural aluminum with stainless hardware and UV-stabilized aluminum-reinforced vinyl privacy panels resist rust, rot, and coastal corrosion far longer than untreated steel or softwood.",
+      },
+    ],
   },
   {
     slug: "chicago-il",
@@ -99,9 +158,28 @@ export const SERVICE_AREAS: readonly ServiceAreaInfo[] = [
     popularRoof: "Impact-Resistant Architectural Shingle & Modified Bitumen",
     popularFence: "Classic White Vinyl Privacy & Steel-Post Cedar",
     neighborhoods: ["Lincoln Park", "Lakeview", "Evanston", "Naperville", "Oak Park", "Hinsdale"],
+    updatedAt: "2026-11-15",
+    faqs: [
+      {
+        question: "How do you prevent winter ice dams on Chicago roofs?",
+        answer:
+          "We install continuous ice-and-water membrane along eaves, valleys, and penetrations paired with balanced intake and ridge exhaust ventilation so snowmelt does not refreeze under shingles.",
+      },
+      {
+        question: "How deep are fence posts set in Chicagoland to prevent frost heave?",
+        answer:
+          "Our crews set structural steel, vinyl, and cedar posts below the 42-inch Illinois frost line in belled concrete footings so gates and fence runs remain plumb after harsh freeze-thaw cycles.",
+      },
+    ],
   },
 ];
 
 export function getServiceAreaBySlug(slug: string): ServiceAreaInfo | undefined {
   return SERVICE_AREAS.find((a) => a.slug === slug);
+}
+
+export function findServiceAreaByZip(zip: string): ServiceAreaInfo | undefined {
+  const clean = zip.replace(/\D/g, "").slice(0, 5);
+  if (clean.length !== 5) return undefined;
+  return SERVICE_AREAS.find((area) => area.sampleZips.includes(clean));
 }

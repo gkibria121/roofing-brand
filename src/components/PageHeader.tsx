@@ -1,28 +1,67 @@
 import Link from "next/link";
 
+export interface BreadcrumbCrumb {
+  name: string;
+  href?: string;
+}
+
 export function PageHeader({
   eyebrow,
   title,
   intro,
   crumbs,
+  currentPath,
 }: {
   eyebrow: string;
   title: string;
   intro: string;
-  crumbs: { name: string; href?: string }[];
+  crumbs: BreadcrumbCrumb[];
+  /** Canonical path of the current page so the final breadcrumb item stays a consistent link with aria-current="page". */
+  currentPath?: string;
 }) {
   return (
     <div className="border-b border-slate-200 bg-gradient-to-b from-brand-50 to-white">
       <div className="container-x py-14 sm:py-20">
-        <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
-          <ol className="flex items-center gap-2">
-            <li><Link href="/" className="hover:text-accent-700">Home</Link></li>
-            {crumbs.map((c) => (
-              <li key={c.name} className="flex items-center gap-2">
-                <span aria-hidden="true">/</span>
-                <span aria-current="page" className="font-semibold text-slate-700">{c.name}</span>
-              </li>
-            ))}
+        <nav aria-label="Breadcrumbs" className="breadcrumb text-sm text-slate-600">
+          <ol>
+            <li>
+              <Link href="/" className="underline-offset-4 hover:text-accent-700 hover:underline">
+                Home
+              </Link>
+            </li>
+            {crumbs.map((c, idx) => {
+              const isLast = idx === crumbs.length - 1;
+              const targetHref = isLast ? (c.href ?? currentPath) : c.href;
+
+              return (
+                <li key={`${c.name}-${idx}`}>
+                  {isLast ? (
+                    targetHref ? (
+                      <Link
+                        href={targetHref}
+                        aria-current="page"
+                        className="font-semibold text-brand-900 hover:underline"
+                      >
+                        {c.name}
+                      </Link>
+                    ) : (
+                      <span aria-current="page" className="font-semibold text-brand-900">
+                        {c.name}
+                      </span>
+                    )
+                  ) : targetHref ? (
+                    <Link
+                      href={targetHref}
+                      className="underline-offset-4 hover:text-accent-700 hover:underline"
+                    >
+                      {c.name}
+                    </Link>
+                  ) : (
+                    <span>{c.name}</span>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </nav>
         <p className="eyebrow mt-6">{eyebrow}</p>

@@ -4,6 +4,9 @@ export type Service = {
   short: string;
   description: string;
   image: string;
+  imageAlt: string;
+  productHref: string;
+  productLinkLabel: string;
   features: string[];
 };
 
@@ -15,6 +18,9 @@ export const services: Service[] = [
     description:
       "From architectural shingles to premium synthetic materials, we replace and install roofs that protect your family and boost curb appeal. Every project includes a written estimate, tear-off, new underlayment, and full clean-up.",
     image: "/images/residential.jpg",
+    imageAlt: "Newly installed architectural asphalt shingle roof on a modern residential home",
+    productHref: "/products/roofing#asphalt",
+    productLinkLabel: "Explore residential roofing systems",
     features: [
       "Asphalt, architectural & designer shingles",
       "Full tear-off and deck inspection",
@@ -29,6 +35,9 @@ export const services: Service[] = [
     description:
       "We install and maintain TPO, EPDM and modified bitumen systems for warehouses, offices, retail and multi-family properties, with minimal disruption to your operations.",
     image: "/images/commercial.jpg",
+    imageAlt: "Reflective white single-ply TPO flat roofing system on a commercial building",
+    productHref: "/products/roofing#tpo",
+    productLinkLabel: "Compare commercial flat roofs",
     features: [
       "TPO, EPDM & modified bitumen",
       "Preventive maintenance plans",
@@ -43,6 +52,9 @@ export const services: Service[] = [
     description:
       "A small leak can become a big problem fast. Our crews find the source, make lasting repairs and help you document storm damage for insurance claims.",
     image: "/images/repair.svg",
+    imageAlt: "Illustration of roof leak detection, flashing repair, and emergency storm response",
+    productHref: "/get-a-quote",
+    productLinkLabel: "Request urgent roof repair",
     features: [
       "Leak detection and repair",
       "Storm & hail damage assessment",
@@ -56,7 +68,10 @@ export const services: Service[] = [
     short: "Standing-seam and metal panel roofs that last 50+ years.",
     description:
       "Energy-efficient, fire-resistant and virtually maintenance-free. Metal roofing is a premium long-term investment that looks great on both modern and traditional homes.",
-    image: "/images/metal.svg",
+    image: "/images/metal-roof.jpg",
+    imageAlt: "Concealed-fastener standing-seam metal roof with clean architectural ribs and solar panels",
+    productHref: "/products/roofing#metal",
+    productLinkLabel: "Explore standing-seam metal roofs",
     features: [
       "Standing-seam & metal panels",
       "Wide range of colors and finishes",
@@ -70,7 +85,10 @@ export const services: Service[] = [
     short: "Privacy, vinyl, ornamental iron, horizontal slat & commercial fencing.",
     description:
       "Boost privacy, security, and curb appeal with custom-built fencing installed with concrete-set posts and matching walk or driveway gates. Preview styles, colors, heights, and layouts around your property in our 3D estimator.",
-    image: "/images/fencing.svg",
+    image: "/images/custom-fence.jpg",
+    imageAlt: "Custom Western Red Cedar horizontal slat privacy fence framing a residential backyard",
+    productHref: "/products/fencing",
+    productLinkLabel: "Explore custom fencing catalog",
     features: [
       "Wood privacy, vinyl & horizontal modern slats",
       "Ornamental aluminum/iron, picket & chain link",

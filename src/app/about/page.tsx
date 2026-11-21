@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
-import { Photo } from "@/components/Photo";
-import { PageHeader } from "@/components/PageHeader";
+import Link from "next/link";
 import { CtaBand } from "@/components/CtaBand";
 import { JsonLd } from "@/components/JsonLd";
-import { breadcrumbSchema } from "@/lib/schema";
+import { PageHeader } from "@/components/PageHeader";
+import { Photo } from "@/components/Photo";
+import { breadcrumbSchema, webPageSchema } from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+const yearsInBusiness = new Date().getFullYear() - site.foundingYear;
+
+const aboutDescription = `Learn about ${site.name}: a locally owned, licensed, bonded, and insured roofing and custom fencing contractor with ${yearsInBusiness}+ years of experience and a 25-year workmanship warranty.`;
+
+export const metadata: Metadata = buildPageMetadata({
   title: "About Us — Licensed & Insured Roofing Contractor",
-  description: `Learn about ${site.name}: a locally owned, licensed and insured roofing contractor with ${new Date().getFullYear() - site.foundingYear}+ years of experience.`,
-  alternates: { canonical: "/about" },
-};
+  description: aboutDescription,
+  path: "/about",
+  keywords: [
+    "about T&S Roofing Systems",
+    "licensed roofing contractor",
+    "insured roof replacement company",
+    "25-year workmanship warranty",
+    "Richardson TX roofing company",
+  ],
+});
 
 const values = [
   { title: "Integrity", text: "We tell you what your roof needs — and what it doesn’t. Honest advice, always." },
@@ -24,8 +37,9 @@ export default function AboutPage() {
       <PageHeader
         eyebrow="About us"
         title={`The team behind ${site.name}`}
-        intro="A locally owned roofing company dedicated to protecting homes and businesses with quality work and honest service."
+        intro="A locally owned roofing and exterior company dedicated to protecting homes and businesses with quality work and honest service."
         crumbs={[{ name: "About" }]}
+        currentPath="/about"
       />
 
       <section className="container-x grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
@@ -33,13 +47,20 @@ export default function AboutPage() {
           <h2 className="text-3xl font-extrabold">Built on quality and trust</h2>
           <div className="mt-5 space-y-4 text-slate-600">
             <p>
-              {site.name} was founded in {site.foundingYear} with a simple goal: provide roofing that lasts, with
-              service that’s straightforward and fair. Today our experienced crews have completed thousands of
-              residential and commercial roofs.
+              {site.name} was founded in {site.foundingYear} with a simple goal: provide roofing and custom fencing
+              that lasts, with service that’s straightforward and fair. Today our experienced crews have completed
+              thousands of residential and commercial roofs across{" "}
+              <Link href="/service-areas" className="font-semibold text-brand-900 underline decoration-accent-600 underline-offset-4 hover:text-accent-700">
+                five regional markets
+              </Link>
+              .
             </p>
             <p>
-              We’re fully licensed, bonded and insured, and we back our workmanship with a written warranty. From the
-              first inspection to the final walkthrough, you’ll deal with professionals who take pride in their work.
+              We’re fully licensed, bonded and insured, and we back our workmanship with a written warranty. From your{" "}
+              <Link href="/estimate" className="font-semibold text-brand-900 underline decoration-accent-600 underline-offset-4 hover:text-accent-700">
+                interactive 3D estimate
+              </Link>{" "}
+              and free inspection to the final walkthrough, you’ll deal with professionals who take pride in their work.
             </p>
           </div>
           <dl className="mt-8 grid grid-cols-2 gap-6">
@@ -50,9 +71,25 @@ export default function AboutPage() {
               </div>
             ))}
           </dl>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/products" className="btn btn-primary">
+              Explore Products &amp; Systems
+            </Link>
+            <Link href="/how-it-works" className="btn btn-secondary">
+              See How We Work
+            </Link>
+          </div>
         </div>
         <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-xl ring-1 ring-slate-200">
-          <Photo src="/images/about.svg" alt="T&S Roofing Systems crew and company truck" fill priority sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
+          <Photo
+            src="/images/about.svg"
+            alt="T&S Roofing Systems certified installation crew and service fleet illustration"
+            fill
+            preload
+            fetchPriority="high"
+            sizes="(min-width: 1024px) 600px, 100vw"
+            className="object-cover"
+          />
         </div>
       </section>
 
@@ -71,7 +108,17 @@ export default function AboutPage() {
       </section>
 
       <CtaBand />
-      <JsonLd data={breadcrumbSchema([{ name: "Home", path: "/" }, { name: "About", path: "/about" }])} />
+      <JsonLd
+        data={[
+          webPageSchema({
+            type: "AboutPage",
+            name: `About ${site.name}`,
+            description: aboutDescription,
+            path: "/about",
+          }),
+          breadcrumbSchema([{ name: "About", path: "/about" }]),
+        ]}
+      />
     </>
   );
 }

@@ -3,24 +3,24 @@ import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import { PageHeader } from "@/components/PageHeader";
 import { QuoteRequestForm } from "@/features/configurator";
-import { breadcrumbSchema } from "@/lib/schema";
+import { breadcrumbSchema, webPageSchema } from "@/lib/schema";
+import { buildPageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
+const quoteDescription = `Request a free, no-obligation roofing or custom fencing quote from ${site.name}. Upload property photos or HOA specs and receive an itemized written estimate within one business day.`;
+
+export const metadata: Metadata = buildPageMetadata({
   title: "Get a Free Quote — Roofing & Custom Fencing Estimate",
-  description: `Request a free, no-obligation roofing or custom fencing quote from ${site.name}. Upload property photos or project notes and receive an itemized written estimate within one business day.`,
-  alternates: { canonical: "/get-a-quote" },
-  openGraph: {
-    title: `Get a Free Quote | ${site.name}`,
-    description: `Request a free written roofing or custom fencing quote from ${site.name} in Richardson, Dallas–Fort Worth, Austin, or Miami.`,
-    url: "/get-a-quote",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `Get a Free Quote | ${site.name}`,
-    description: `Request a free written roofing or custom fencing quote from ${site.name}.`,
-  },
-};
+  description: quoteDescription,
+  path: "/get-a-quote",
+  keywords: [
+    "free roofing quote",
+    "custom fence estimate",
+    "written roof replacement estimate",
+    "storm damage roof quote",
+    "T&S Roofing Systems quote",
+  ],
+});
 
 const quoteBenefits = [
   {
@@ -45,6 +45,7 @@ export default function GetAQuotePage() {
         title="Get your free roofing & fencing quote"
         intro="Select your service, enter your property details, and attach any photos or project notes. Our specialists follow up within one business day."
         crumbs={[{ name: "Get a Quote" }]}
+        currentPath="/get-a-quote"
       />
 
       <section className="section" aria-label="Quote request form">
@@ -116,10 +117,15 @@ export default function GetAQuotePage() {
       </section>
 
       <JsonLd
-        data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Get a Quote", path: "/get-a-quote" },
-        ])}
+        data={[
+          webPageSchema({
+            type: "ContactPage",
+            name: `Get a Free Quote | ${site.name}`,
+            description: quoteDescription,
+            path: "/get-a-quote",
+          }),
+          breadcrumbSchema([{ name: "Get a Quote", path: "/get-a-quote" }]),
+        ]}
       />
     </>
   );

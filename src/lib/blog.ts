@@ -4,8 +4,12 @@ export interface BlogPost {
   category: "Roofing" | "Fencing" | "Planning";
   excerpt: string;
   publishedAt: string;
+  updatedAt: string;
   readMinutes: number;
   author: string;
+  image: string;
+  imageAlt: string;
+  keywords: readonly string[];
   sections: readonly {
     heading: string;
     paragraphs: readonly string[];
@@ -23,8 +27,18 @@ export const BLOG_POSTS: readonly BlogPost[] = [
     excerpt:
       "Compare upfront installation pricing, 30-year total ownership cost, hail durability, energy savings, and solar-panel readiness for your home.",
     publishedAt: "2026-10-18",
+    updatedAt: "2026-11-10",
     readMinutes: 6,
     author: "T&S Engineering Team",
+    image: "/images/metal-roof.jpg",
+    imageAlt: "Standing-seam metal roof with solar panels compared alongside residential shingle roofing",
+    keywords: [
+      "standing-seam metal roof cost",
+      "metal vs asphalt shingles",
+      "architectural shingle lifespan",
+      "solar ready metal roofing",
+      "Class 4 hail rated shingles",
+    ],
     sections: [
       {
         heading: "Upfront cost vs. lifetime value",
@@ -55,8 +69,18 @@ export const BLOG_POSTS: readonly BlogPost[] = [
     excerpt:
       "Western Red Cedar, solid vinyl, horizontal modern slats, or ornamental iron? Learn how material, post type, and height impact curb appeal and longevity.",
     publishedAt: "2026-10-04",
+    updatedAt: "2026-11-05",
     readMinutes: 5,
     author: "T&S Exterior Specialists",
+    image: "/images/custom-fence.jpg",
+    imageAlt: "Custom Western Red Cedar horizontal slat privacy fence enclosing a backyard",
+    keywords: [
+      "privacy fence styles",
+      "Western Red Cedar fence",
+      "horizontal modern slat fence",
+      "steel post fence longevity",
+      "6 ft vs 8 ft privacy fence",
+    ],
     sections: [
       {
         heading: "Matching fence style to home architecture",
@@ -86,8 +110,18 @@ export const BLOG_POSTS: readonly BlogPost[] = [
     excerpt:
       "Bundling exterior upgrades streamlines permitting and crew mobilization—here is why order of operations protects your new landscaping and fence.",
     publishedAt: "2026-09-21",
+    updatedAt: "2026-10-28",
     readMinutes: 4,
     author: "Marcus Torres, Lead Project Manager",
+    image: "/images/hero.jpg",
+    imageAlt: "Modern residential home exterior showcasing coordinated charcoal roof and perimeter fencing",
+    keywords: [
+      "replace roof and fence together",
+      "exterior renovation sequencing",
+      "roof tear-off before fence",
+      "HOA exterior approval packet",
+      "bundled roofing and fencing quote",
+    ],
     sections: [
       {
         heading: "Always complete roof tear-off before fence installation",
@@ -117,8 +151,18 @@ export const BLOG_POSTS: readonly BlogPost[] = [
     excerpt:
       "After high winds or hail, subtle damage around flashing, ridge vents, and fence posts can turn into costly leaks if missed. Here is what our inspectors check.",
     publishedAt: "2026-09-06",
+    updatedAt: "2026-10-15",
     readMinutes: 5,
     author: "T&S Inspection Crew",
+    image: "/images/residential.jpg",
+    imageAlt: "Residential roof inspection after wind and hail storm",
+    keywords: [
+      "storm damage roof inspection",
+      "hail damage shingle signs",
+      "roof leak checklist",
+      "insurance claim roof documentation",
+      "emergency roof tarping",
+    ],
     sections: [
       {
         heading: "What you can safely spot from the ground",
@@ -138,6 +182,21 @@ export const BLOG_POSTS: readonly BlogPost[] = [
   },
 ];
 
+export const BLOG_CATEGORIES = ["Roofing", "Fencing", "Planning"] as const;
+export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
+
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((p) => p.slug === slug);
+}
+
+export function getBlogWordCount(post: BlogPost): number {
+  const parts: string[] = [post.title, post.excerpt];
+  for (const section of post.sections) {
+    parts.push(section.heading, ...section.paragraphs, ...(section.bullets ?? []));
+  }
+  return parts
+    .join(" ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
 }
