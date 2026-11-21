@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { services } from "@/lib/services";
 import { site } from "@/lib/site";
 import {
@@ -51,13 +51,11 @@ function formatFileSize(bytes: number): string {
 }
 
 type QuoteRequestFormProps = {
-  serviceOptions: readonly string[];
+  serviceOptions?: readonly string[];
   defaultService?: string;
   allowEmptyService?: boolean;
   defaultAddress?: string;
   submitLabel?: string;
-  autoFocusFirstField?: boolean;
-  compact?: boolean;
   className?: string;
   formAriaLabelledBy?: string;
   buildSubmission?: (data: CustomQuoteInquiry, attachments: readonly AttachedFile[]) => QuoteSubmissionPayload;
@@ -68,13 +66,11 @@ type QuoteRequestFormProps = {
  * supporting drag-and-drop attachments, blur-time field validation, and accessible live feedback.
  */
 export function QuoteRequestForm({
-  serviceOptions,
+  serviceOptions = QUICK_QUOTE_SERVICE_OPTIONS,
   defaultService = "",
   allowEmptyService = false,
   defaultAddress = "",
   submitLabel = "Get a quote",
-  autoFocusFirstField = false,
-  compact = false,
   className = "",
   formAriaLabelledBy,
   buildSubmission,
@@ -105,18 +101,6 @@ export function QuoteRequestForm({
       if (announceTimerRef.current) clearTimeout(announceTimerRef.current);
     };
   }, []);
-
-  const firstFieldRef = useCallback(
-    (el: HTMLSelectElement | null) => {
-      if (!el) return;
-      if (autoFocusFirstField) {
-        el.setAttribute("autofocus", "");
-      } else {
-        el.removeAttribute("autofocus");
-      }
-    },
-    [autoFocusFirstField],
-  );
 
   function cancelPendingAnnouncement(field?: CustomQuoteField) {
     if (field && announcedFieldRef.current !== field) return;
@@ -277,7 +261,7 @@ export function QuoteRequestForm({
         {announcement}
       </div>
 
-      <div className={compact ? "space-y-2.5" : "space-y-4"}>
+      <div className="space-y-4">
         {/* Service select */}
         <div className="relative pt-1.5">
           <label
@@ -288,7 +272,6 @@ export function QuoteRequestForm({
           </label>
           <div className="relative">
             <select
-              ref={firstFieldRef}
               id={`${uid}-service`}
               name="service"
               required
@@ -480,7 +463,7 @@ export function QuoteRequestForm({
           <textarea
             id={`${uid}-notes`}
             name="notes"
-            rows={compact ? 2 : 3}
+            rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Share gate access details, HOA preferences, or timeline notes…"
@@ -502,9 +485,7 @@ export function QuoteRequestForm({
               setDragActive(false);
               addFiles(e.dataTransfer.files);
             }}
-            className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed px-4 ${
-              compact ? "py-2" : "py-3"
-            } transition-colors ${
+            className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed px-4 py-3 transition-colors ${
               dragActive
                 ? "border-accent-600 bg-orange-50/60"
                 : "border-slate-300 bg-slate-50/70"

@@ -7,7 +7,6 @@ import { useEffect, useId, useRef } from "react";
 import { SERVICE_AREAS } from "@/lib/serviceAreas";
 import { productsMegaMenu, site } from "@/lib/site";
 import { Logo } from "./Logo";
-import { GetQuoteButton } from "./GetQuoteButton";
 
 interface SubmenuEntry {
   li: HTMLLIElement | null;
@@ -518,12 +517,14 @@ export function Header() {
 
             {/* Primary CTA: Get a Quote */}
             <li className="nav-cta-item pt-1.5">
-              <GetQuoteButton
-                onOpen={closeAllPopovers}
+              <Link
+                href="/get-a-quote"
+                onClick={closeAllPopovers}
+                aria-current={pathname === "/get-a-quote" ? "page" : undefined}
                 className="btn btn-primary w-full whitespace-nowrap px-4 py-2.5 text-sm"
               >
                 Get a Quote
-              </GetQuoteButton>
+              </Link>
             </li>
           </ul>
         </nav>

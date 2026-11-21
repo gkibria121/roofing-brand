@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
-import { GetQuoteButton } from "./GetQuoteButton";
 
 export function CtaBand({
   title = "Ready for a roof or fence you can count on?",
@@ -18,7 +18,7 @@ export function CtaBand({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <GetQuoteButton className="btn btn-primary btn-lg">Get a Quote</GetQuoteButton>
+          <Link href="/get-a-quote" className="btn btn-primary btn-lg">Get a Quote</Link>
           <a href={`tel:${site.phoneHref}`} className="btn btn-lg border-2 border-white/70 text-white hover:bg-white/10">
             Call {site.phone}
           </a>

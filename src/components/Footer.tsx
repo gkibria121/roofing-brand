@@ -44,6 +44,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link className="font-semibold text-brand-900 hover:text-accent-700" href="/get-a-quote">
+                Get a Free Quote
+              </Link>
+            </li>
+            <li>
               <Link className="font-semibold text-accent-700 hover:underline" href="/estimate">
                 3D Quote Configurator →
               </Link>
