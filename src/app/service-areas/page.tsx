@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CtaBand } from "@/components/CtaBand";
+import { GetQuoteButton } from "@/components/GetQuoteButton";
 import { JsonLd } from "@/components/JsonLd";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceAreaZipChecker } from "@/components/ServiceAreaZipChecker";
@@ -62,9 +63,9 @@ export default function ServiceAreasPage() {
                   >
                     View local details →
                   </Link>
-                  <Link href="/estimate" className="text-xs font-bold text-slate-500 hover:text-brand-900">
+                  <GetQuoteButton className="text-xs font-bold text-slate-500 hover:text-brand-900">
                     Get a Quote
-                  </Link>
+                  </GetQuoteButton>
                 </div>
               </article>
             ))}

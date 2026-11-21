@@ -42,6 +42,17 @@ export function validateCustomQuoteInquiry(input: unknown): ValidationResult<Cus
   return formatZodResult(CustomQuoteInquirySchema.safeParse(input));
 }
 
+export type CustomQuoteField = keyof CustomQuoteInquiry;
+
+export function validateCustomQuoteField<K extends CustomQuoteField>(
+  field: K,
+  value: unknown,
+): string | null {
+  const fieldSchema = CustomQuoteInquirySchema.shape[field];
+  const parsed = fieldSchema.safeParse(value);
+  return parsed.success ? null : (parsed.error.issues[0]?.message ?? "Please check this field.");
+}
+
 const ANSWER_KEYS = Object.keys(AnswersSchema.shape) as StepId[];
 
 /**

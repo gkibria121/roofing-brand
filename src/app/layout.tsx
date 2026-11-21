@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
+import { QuoteModalProvider } from "@/components/QuoteModalProvider";
 import { localBusinessSchema, websiteSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 
@@ -69,11 +70,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
-        <Header />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <QuoteModalProvider>
+          <Header />
+          <main id="main" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </QuoteModalProvider>
         <JsonLd data={[localBusinessSchema(), websiteSchema()]} />
       </body>
     </html>

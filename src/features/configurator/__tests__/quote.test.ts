@@ -10,7 +10,7 @@ import {
   updateConfigurationTier,
 } from "../domain/quote";
 import { MAX_ATTACHMENT_BYTES } from "../domain/schemas";
-import { validateCustomQuoteInquiry } from "../domain/validation";
+import { validateCustomQuoteField, validateCustomQuoteInquiry } from "../domain/validation";
 
 describe("ZIP code to address lookup", () => {
   it("returns curated Richardson TX addresses for ZIP 75081", async () => {
@@ -161,5 +161,14 @@ describe("custom quote form Zod validation", () => {
     if (!res.success) {
       expect(res.fieldErrors.attachments).toContain("10 MB");
     }
+  });
+
+  it("validates individual quote fields cleanly for blur-time feedback", () => {
+    expect(validateCustomQuoteField("service", "")).toBe("Please select a service.");
+    expect(validateCustomQuoteField("service", "Metal Roofing")).toBeNull();
+    expect(validateCustomQuoteField("email", "bad-email")).toBe("Please enter a valid email address.");
+    expect(validateCustomQuoteField("email", "taylor@example.com")).toBeNull();
+    expect(validateCustomQuoteField("acceptedTerms", false)).toContain("Terms of Use");
+    expect(validateCustomQuoteField("acceptedTerms", true)).toBeNull();
   });
 });

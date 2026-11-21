@@ -1,4 +1,10 @@
 export { EstimateWizard } from "./components/EstimateWizard";
+export {
+  QuoteRequestForm,
+  QUICK_QUOTE_SERVICE_OPTIONS,
+  type AttachedFile,
+  type QuoteSubmissionPayload,
+} from "./components/QuoteRequestForm";
 export { FENCE_CATALOG, getFenceFinish, getFenceStyle } from "./catalogs/fencing";
 export { ROOF_MATERIAL_CATALOG, SLOPE_OPTIONS, getRoofMaterialDef } from "./catalogs/roofing";
 export { SERVICE_REGISTRY, getServicePlugin } from "./domain/registry";
@@ -33,8 +39,10 @@ export {
   parseConfiguratorState,
   serializeConfiguratorState,
   validateContactInquiry,
+  validateCustomQuoteField,
   validateCustomQuoteInquiry,
   validateQuickEstimateInquiry,
+  type CustomQuoteField,
 } from "./domain/validation";
 export type {
   Answers,
